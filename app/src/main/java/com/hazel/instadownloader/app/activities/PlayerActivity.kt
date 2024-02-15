@@ -1,10 +1,12 @@
 package com.hazel.instadownloader.app.activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.hazel.instadownloader.R
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.app.adapters.VideoPagerAdapter
 import com.hazel.instadownloader.databinding.ActivityPlayerBinding
+
 
 class PlayerActivity : AppCompatActivity() {
     private var binding: ActivityPlayerBinding? = null
@@ -22,11 +24,12 @@ class PlayerActivity : AppCompatActivity() {
         videoPagerAdapter = VideoPagerAdapter(videoUris, this)
         binding?.videoPager?.adapter = videoPagerAdapter
         binding?.videoPager?.setCurrentItem(position, false)
-    }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
+        /*binding?.videoPager?.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+
+            override fun onPageSelected(position: Int) {
+                videoPagerAdapter?.simpleVideoView?.start()
+            }
+        })*/
     }
 }

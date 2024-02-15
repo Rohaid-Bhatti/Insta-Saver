@@ -13,6 +13,8 @@ import com.hazel.instadownloader.R
 class VideoPagerAdapter(private val videoUris: List<String>, private val context: Context) :
     RecyclerView.Adapter<VideoPagerAdapter.VideoViewHolder>() {
     var mediaControls: MediaController? = null
+    private var currentVideoPosition = -1
+//    var simpleVideoView : VideoView? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_video, parent, false)
@@ -34,6 +36,8 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
         }
 
         fun bind(videoUri: String) {
+//            simpleVideoView = itemView.findViewById(R.id.simpleVideoView)
+
             simpleVideoView.setMediaController(mediaControls)
             simpleVideoView.setVideoURI(Uri.parse(videoUri))
             simpleVideoView.requestFocus()

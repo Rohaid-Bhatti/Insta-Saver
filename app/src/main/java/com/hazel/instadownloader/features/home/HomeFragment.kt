@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -35,14 +36,18 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val clipboard: ClipboardManager? =
-            requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        try {
-            val urlText = clipboard?.primaryClip?.getItemAt(0)?.text!!
-            Log.d("CHECKING_URL", "onViewCreated: $urlText")
-        } catch (e: Exception) {
-            return
-        }
+        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                val clipboard = (requireActivity().getSystemService(Context.CLIPBOARD_SERVICE)) as? ClipboardManager
+                val textToPaste = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
+
+                if (!textToPaste.isNullOrEmpty() && textToPaste.startsWith("https://www.instagram.com/")) {
+                    binding.etUrl.setText(textToPaste)
+                }
+            }
+        })
 
         binding.etUrl.onFocusChangeListener = OnFocusChangeListener { _, focused ->
             val keyboard =
