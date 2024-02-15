@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="titleColor">#F4107B</color>
+    <color name="subtitleColor">#273344</color>
+    <color name="bgSplashColor">#FEDBEB</color>
+    <color name="adsTextColor">#8BA1BD</color>
+
+    <color name="adsStartColor">#EBB34D</color>
+    <color name="adsEndColor">#F79532</color>
+    <color name="editTextBorderColor">#FDDDEC</color>
+    <color name="helpCrossColor">#71787E</color>
+    <color name="downloadRecyclerItemColor">#F3F3F3</color>
+
+    <color name="playBackgroundColor">#801D2939</color>
+</resources>

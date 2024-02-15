@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="padding_page_small">16dp</dimen>
+    <dimen name="padding_content_small">6dp</dimen>
+    <dimen name="padding_page">10dp</dimen>
+    <dimen name="padding_page_large">24dp</dimen>
+    <dimen name="splash_main_text">22sp</dimen>
+    <dimen name="splash_subTitle_text">14sp</dimen>
+    <dimen name="splash_ad_line_text">12sp</dimen>
+
+    <dimen name="bottom_nav_margin">28dp</dimen>
+    <dimen name="nav_indicator_height">4dp</dimen>
+    <dimen name="drawer_header_height">50dp</dimen>
+    <dimen name="drawer_header_text">18sp</dimen>
+    <dimen name="remove_ad_margin">8dp</dimen>
+    <dimen name="remove_ad_text">16sp</dimen>
+    <dimen name="edit_text_padding_horizontal">18dp</dimen>
+    <dimen name="edit_text_padding_vertical">14dp</dimen>
+    <dimen name="edit_text_radius_bg">30dp</dimen>
+
+    <dimen name="language_button_text">200dp</dimen>
+    <dimen name="navigation_drawer_width">250dp</dimen>
+    <dimen name="nav_header_height">300dp</dimen>
+    <dimen name="help_image_size">500dp</dimen>
+    <dimen name="language_recycler_bottom">8dp</dimen>
+    <dimen name="language_button_padding">72dp</dimen>
+    <dimen name="language_recycler_bottom_padding">75dp</dimen>
+    <dimen name="image_size">40dp</dimen>
+    <dimen name="padding_text_small">2dp</dimen>
+
+    <dimen name="download_image_size">180dp</dimen>
+</resources>

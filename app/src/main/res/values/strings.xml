@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">Insta Downloader</string>
+
+    <!--Splash String-->
+    <string name="download_unlimited_photos_videos"><![CDATA[Download Unlimited Photos & Videos]]></string>
+    <string name="ad_text">This Action might contain Ad</string>
+
+    <!--Main Activity String-->
+    <string name="home_bn">Home</string>
+    <string name="browser_bn">Browser</string>
+    <string name="download_bn">Download</string>
+    <string name="help_toolbar">help</string>
+    <string name="premium_toolbar">premium</string>
+
+    <!--Navigation Drawer-->
+    <string name="open_nav">Open Navigation Drawer</string>
+    <string name="close_nav">Close Navigation Drawer</string>
+    <string name="language_drawer">Language</string>
+    <string name="terms_conditions_drawer"><![CDATA[Terms & Conditions]]></string>
+    <string name="privacy_policy_drawer">Privacy Policy</string>
+    <string name="feedback_drawer">Feedback</string>
+    <string name="share_app_drawer">Share App</string>
+    <string name="rate_us_drawer">Rate Us</string>
+    <string name="app_version_drawer">App Version 0.1</string>
+    <string name="remove_ads_drawer">Remove Ads</string>
+    <string name="share_app_message">Check out My App on the Play Store: https://play.google.com/store/apps/details?id=</string>
+
+    <!--Home Fragment-->
+    <string name="et_hint_text">Paste link here...</string>
+    <string name="no_downloads">No downloads found yet!</string>
+
+    <!--Language Activity-->
+    <string name="save_btn">Save</string>
+    <string name="language_title">Language</string>
+
+    <!--Help Bottom Sheet-->
+    <string name="help_title">How to Download</string>
+    <string name="help_subtitle">Method 1/2</string>
+
+    <!--Download Menu BottomSheet-->
+    <string name="repost_txt">Repost</string>
+    <string name="view_txt">View on Instagram</string>
+    <string name="whatsapp_txt">Share on WhatsApp</string>
+    <string name="share_txt">Share</string>
+    <string name="rename_txt">Rename</string>
+    <string name="delete_txt">Delete</string>
+
+    <!--Permission custom Dialog box-->
+    <string name="permission_denied_title">Permission Request</string>
+    <string name="permission_denied_message">Provide permission for the media to be loaded.</string>
+    <string name="ok_btn">Allow Access</string>
+</resources>

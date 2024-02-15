@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/homeBN"
+        android:icon="@drawable/home_selector"
+        app:showAsAction="ifRoom"
+        android:title="@string/home_bn"  />
+    <item
+        android:id="@+id/inspectionBN"
+        android:icon="@drawable/browse_selector"
+        app:showAsAction="ifRoom"
+        android:title="@string/browser_bn" />
+    <item
+        android:id="@+id/settingBN"
+        android:icon="@drawable/download_selector"
+        app:showAsAction="ifRoom"
+        android:title="@string/download_bn" />
+</menu>

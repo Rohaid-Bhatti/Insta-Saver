@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cons_main"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/language_button_padding"
+    android:background="@drawable/item_language_bg"
+    android:layout_marginBottom="@dimen/remove_ad_margin">
+
+    <ImageView
+        android:id="@+id/flagIcon"
+        android:layout_width="@dimen/image_size"
+        android:layout_height="@dimen/image_size"
+        android:layout_marginStart="@dimen/padding_page"
+        android:src="@drawable/english"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    <TextView
+        android:id="@+id/languageName"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/image_size"
+        android:layout_marginStart="@dimen/padding_page"
+        android:layout_marginEnd="@dimen/padding_text_small"
+        android:layout_toEndOf="@+id/flagIcon"
+        android:fontFamily="@font/sf_pro_rounded_bold"
+        android:padding="@dimen/padding_text_small"
+        android:textAllCaps="true"
+        android:textSize="@dimen/remove_ad_text"
+        android:textColor="@color/titleColor"
+        tools:text="English"
+        app:layout_constraintStart_toEndOf="@+id/flagIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!--<com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:button="@drawable/checkbox_state"
+        android:layout_alignParentEnd="true"
+        app:buttonTint="?attr/colorControlActivated"
+        app:useMaterialThemeColors="false" />-->
+
+    <ImageView
+        android:id="@+id/check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/padding_page"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/tick_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
