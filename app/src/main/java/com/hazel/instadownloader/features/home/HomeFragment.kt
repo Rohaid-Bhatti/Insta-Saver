@@ -40,12 +40,7 @@ class HomeFragment : Fragment() {
             override fun onGlobalLayout() {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-                val clipboard = (requireActivity().getSystemService(Context.CLIPBOARD_SERVICE)) as? ClipboardManager
-                val textToPaste = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
-
-                if (!textToPaste.isNullOrEmpty() && textToPaste.startsWith("https://www.instagram.com/")) {
-                    binding.etUrl.setText(textToPaste)
-                }
+                copyUrl()
             }
         })
 
@@ -162,8 +157,20 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun copyUrl() {
+        val clipboard = (activity?.getSystemService(Context.CLIPBOARD_SERVICE)) as? ClipboardManager
+        val textToPaste = clipboard?.primaryClip?.getItemAt(0)?.text?.toString()
+
+        if (!textToPaste.isNullOrEmpty() && textToPaste.startsWith("https://www.instagram.com/")) {
+            binding.etUrl.setText(textToPaste)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (binding.etUrl.text.toString().trim().isEmpty()) {
+            copyUrl()
+        }
     }
 }

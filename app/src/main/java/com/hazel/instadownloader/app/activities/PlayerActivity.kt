@@ -2,8 +2,6 @@ package com.hazel.instadownloader.app.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
-import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.app.adapters.VideoPagerAdapter
 import com.hazel.instadownloader.databinding.ActivityPlayerBinding
 

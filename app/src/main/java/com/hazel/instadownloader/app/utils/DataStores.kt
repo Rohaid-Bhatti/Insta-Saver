@@ -15,6 +15,7 @@ object DataStores {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
     private val PERMISSION_REQUEST_COUNT_KEY = intPreferencesKey("PERMISSION_REQUEST_COUNT_KEY")
+    private val BOTTOM_SHEET_SHOWN_KEY = booleanPreferencesKey("BOTTOM_SHEET_SHOWN_KEY")
 
     // Function to store the permission request count
     suspend fun storePermissionRequestCount(count: Int, context: Context) {
@@ -27,6 +28,20 @@ object DataStores {
     fun getPermissionRequestCount(context: Context): Flow<Int> {
         return context.dataStore.data.map { settings ->
             settings[PERMISSION_REQUEST_COUNT_KEY] ?: 0
+        }
+    }
+
+    // Function to store whether the bottom sheet has been shown
+    suspend fun storeBottomSheetShown(context: Context, shown: Boolean) {
+        context.dataStore.edit { settings ->
+            settings[BOTTOM_SHEET_SHOWN_KEY] = shown
+        }
+    }
+
+    // Function to check if the bottom sheet has been shown
+    fun isBottomSheetShown(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { settings ->
+            settings[BOTTOM_SHEET_SHOWN_KEY] ?: false
         }
     }
 }

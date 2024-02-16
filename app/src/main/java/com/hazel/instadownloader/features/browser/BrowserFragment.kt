@@ -95,9 +95,4 @@ class BrowserFragment : Fragment() {
             e.printStackTrace()
         }
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 }

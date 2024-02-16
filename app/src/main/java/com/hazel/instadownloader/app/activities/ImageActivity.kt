@@ -6,8 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
-import androidx.viewpager.widget.ViewPager
-import com.hazel.instadownloader.R
+import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.app.adapters.ImagePagerAdapter
 import com.hazel.instadownloader.databinding.ActivityImageBinding
 import java.io.File
@@ -15,7 +14,7 @@ import java.io.File
 class ImageActivity : AppCompatActivity() {
     private lateinit var binding: ActivityImageBinding
     private lateinit var imageUris: List<String>
-    private lateinit var viewPager: ViewPager
+    private lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,10 +26,9 @@ class ImageActivity : AppCompatActivity() {
         imageUris = intent.getStringArrayListExtra("imageUris")!!
         val position = intent.getIntExtra("position", 0)
 
-        // Set up ViewPager
         viewPager = binding.viewPager
         viewPager.adapter = ImagePagerAdapter(imageUris, this)
-        viewPager.currentItem = position
+        viewPager.setCurrentItem(position, false)
 
         binding.detailsButton.setOnClickListener {
             showImageDetails(viewPager.currentItem)

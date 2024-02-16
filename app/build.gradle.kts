@@ -74,8 +74,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     //additional libraries
-    implementation("nl.joery.animatedbottombar:library:1.1.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
 }

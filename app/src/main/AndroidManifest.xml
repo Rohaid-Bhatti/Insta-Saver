@@ -28,6 +28,7 @@
             android:exported="false" />
         <activity
             android:name=".app.activities.PlayerActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
             android:name=".app.activities.LanguageActivity"

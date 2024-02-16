@@ -98,7 +98,7 @@ class DownloadFragment : Fragment() {
         val downloadFolder =
             File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath)
 
-        return downloadFolder.listFiles { file ->
+        val files = downloadFolder.listFiles { file ->
             file.isFile &&
                     (file.extension.equals("jpg", ignoreCase = true) ||
                             file.extension.equals("png", ignoreCase = true) ||
@@ -107,13 +107,17 @@ class DownloadFragment : Fragment() {
                             file.extension.equals("3gp", ignoreCase = true) ||
                             file.extension.equals("mkv", ignoreCase = true))
         }?.toList() ?: emptyList()
+
+        return files.sortedByDescending { it.lastModified() }
     }
 
     private fun updateUI(files: List<File>) {
         binding.progressBar.visibility = View.GONE
 
         if (files.isNotEmpty()) {
-            downloadAdapter = DownloadAdapter(files as ArrayList<File>)
+            val fileList = ArrayList(files)
+
+            downloadAdapter = DownloadAdapter(fileList)
             binding.recyclerView.layoutManager = GridLayoutManager(context, 2)
             binding.recyclerView.adapter = downloadAdapter
 
@@ -131,7 +135,7 @@ class DownloadFragment : Fragment() {
     }
 
     private fun handlePermissionDenied() {
-        if (permissionRequestCount >= 2) {
+        if (permissionRequestCount >= 1) {
             showCustomPermissionDeniedDialog()
 
             binding.progressBar.visibility = View.GONE
@@ -194,10 +198,5 @@ class DownloadFragment : Fragment() {
             permissionRequestCount++
             DataStores.storePermissionRequestCount(permissionRequestCount, requireContext())
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

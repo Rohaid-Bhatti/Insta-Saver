@@ -5,6 +5,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.VideoView
 import androidx.recyclerview.widget.RecyclerView
@@ -12,9 +13,6 @@ import com.hazel.instadownloader.R
 
 class VideoPagerAdapter(private val videoUris: List<String>, private val context: Context) :
     RecyclerView.Adapter<VideoPagerAdapter.VideoViewHolder>() {
-    var mediaControls: MediaController? = null
-    private var currentVideoPosition = -1
-//    var simpleVideoView : VideoView? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_video, parent, false)
@@ -24,24 +22,47 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         holder.bind(videoUris[position])
     }
-    //hello
+
     override fun getItemCount(): Int = videoUris.size
 
     inner class VideoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val simpleVideoView: VideoView = itemView.findViewById(R.id.simpleVideoView)
-
-        init {
-            mediaControls = MediaController(context)
-            mediaControls?.setAnchorView(simpleVideoView)
+        private val simpleVideoView: VideoView = itemView.findViewById(R.id.video_view)
+//        private val pauseIcon: ImageView = itemView.findViewById(R.id.pause_icon)
+        private val mediaController = MediaController(context).apply {
+            setAnchorView(simpleVideoView)
         }
 
-        fun bind(videoUri: String) {
-//            simpleVideoView = itemView.findViewById(R.id.simpleVideoView)
+//        init {
+//            mediaControls = MediaController(context)
+//            mediaControls?.setAnchorView(simpleVideoView)
+//        }
 
-            simpleVideoView.setMediaController(mediaControls)
+        fun bind(videoUri: String) {
+
+//            simpleVideoView.apply {
+//                setVideoPath(videoUri)
+//                setOnPreparedListener {
+//                    it.start()
+//                    it.isLooping = true
+//                }
+//                //play pause
+//                setOnClickListener {
+//                    if(isPlaying){
+//                        pause()
+//                        pauseIcon.visibility = View.VISIBLE
+//                    }else{
+//                        start()
+//                        pauseIcon.visibility = View.GONE
+//                    }
+//                }
+//            }
+
+            simpleVideoView.setMediaController(mediaController)
             simpleVideoView.setVideoURI(Uri.parse(videoUri))
-            simpleVideoView.requestFocus()
-            simpleVideoView.start()
+            simpleVideoView.setOnPreparedListener {
+                it.start()
+                it.isLooping = true
+            }
         }
     }
 }

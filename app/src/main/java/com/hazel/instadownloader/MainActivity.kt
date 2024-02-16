@@ -31,15 +31,24 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
-    private var permissionRequestCount = 0
+//    private var permissionRequestCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        CoroutineScope(Dispatchers.IO).launch {
+            val isBottomSheetShown = DataStores.isBottomSheetShown(this@MainActivity).first()
+            if (!isBottomSheetShown) {
+                showBottomSheet()
+                DataStores.storeBottomSheetShown(this@MainActivity, true)
+            }
+        }
+
+
         // for saving the values in to data store
-        CoroutineScope(Dispatchers.Main).launch {
+        /*CoroutineScope(Dispatchers.Main).launch {
             permissionRequestCount = DataStores.getPermissionRequestCount(this@MainActivity).first()
 
             if (!PermissionManager.checkPermission(this@MainActivity)) {
@@ -47,7 +56,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 // Anything
             }
-        }
+        }*/
 
         setUpAppbar()
         loadFragment(HomeFragment())
@@ -56,7 +65,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.navView.setNavigationItemSelectedListener(this)
     }
 
-    private fun handlePermissionDenied() {
+    /*private fun handlePermissionDenied() {
         if (permissionRequestCount >= 2) {
 //            showCustomPermissionDeniedDialog()
         } else {
@@ -115,7 +124,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //     finish()
             }
         }
-    }
+    }*/
 
     //for bottom navigation
     private fun setUpBottomNavigation() = binding.apply {
