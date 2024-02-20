@@ -3,15 +3,13 @@ package com.hazel.instadownloader.app.adapters
 import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.github.chrisbanes.photoview.PhotoView
 import com.hazel.instadownloader.databinding.ItemImageBinding
 
-class ImagePagerAdapter(private val imageUris: List<String>, private val context: Context) :
+class ImagePagerAdapter(private var imageUris: MutableList<String>, private val context: Context) :
     RecyclerView.Adapter<ImagePagerAdapter.ImageViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
@@ -35,5 +33,9 @@ class ImagePagerAdapter(private val imageUris: List<String>, private val context
 
             photoView.isZoomable = true
         }
+    }
+
+    fun deleteItem(newImageList: MutableList<String>) {
+        imageUris= newImageList
     }
 }

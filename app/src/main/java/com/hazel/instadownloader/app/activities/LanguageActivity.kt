@@ -40,6 +40,11 @@ class LanguageActivity : AppCompatActivity() {
         binding.recyclerViewLanguages.adapter = languageAdapter
 //        binding.recyclerViewLanguages.addItemDecoration(TopSpaceItemDecoration())
 
+        // just for the testing purpose i am dismissing the activity
+        binding.btnSave.setOnClickListener {
+            finish()
+        }
+
 //        val get = Locale.getDefault().language
         /*binding.tvNext.setOnClickListener {
             if (get != selected) {

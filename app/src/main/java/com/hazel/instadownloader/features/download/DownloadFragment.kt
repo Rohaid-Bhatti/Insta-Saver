@@ -4,12 +4,17 @@ import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
@@ -24,20 +29,19 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class DownloadFragment : Fragment() {
+    private lateinit var viewModel: DownloadViewModel
+    private lateinit var downloadAdapter: DownloadAdapter
     private var _binding: FragmentDownloadBinding? = null
     private val binding get() = _binding!!
 
-    private var activityResultLauncher: ActivityResultLauncher<Array<String>> =
+    private val activityResultLauncher: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsMap ->
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
                 if (permissionsMap[Manifest.permission.READ_MEDIA_IMAGES] == true && permissionsMap[Manifest.permission.READ_MEDIA_VIDEO] == true) {
 
-                    lifecycleScope.launch {
-                        val files = loadFilesInBackground()
-                        updateUI(files)
-                    }
+                    loadFiles()
                 } else {
 
                     binding.progressBar.visibility = View.GONE
@@ -47,10 +51,7 @@ class DownloadFragment : Fragment() {
             } else {
 
                 if (permissionsMap[Manifest.permission.READ_EXTERNAL_STORAGE] == true && permissionsMap[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true) {
-                    lifecycleScope.launch {
-                        val files = loadFilesInBackground()
-                        updateUI(files)
-                    }
+                    loadFiles()
                 } else {
                     binding.progressBar.visibility = View.GONE
                     binding.ivDownloadBox.visibility = View.VISIBLE
@@ -59,7 +60,6 @@ class DownloadFragment : Fragment() {
             }
         }
 
-    private lateinit var downloadAdapter: DownloadAdapter
     private var permissionRequestCount = 0
 
     override fun onCreateView(
@@ -73,51 +73,42 @@ class DownloadFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel = ViewModelProvider(this)[DownloadViewModel::class.java]
+
         binding.progressBar.visibility = View.VISIBLE
         binding.ivDownloadBox.visibility = View.GONE
         binding.materialTextView.visibility = View.GONE
-        loadFilesAsync()
-    }
 
-    private fun loadFilesAsync() {
+        viewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
+            updateUI(files)
+        }
+
         lifecycleScope.launch {
             permissionRequestCount = DataStores.getPermissionRequestCount(requireContext()).first()
 
             if (!checkPermission(requireContext())) {
                 handlePermissionDenied()
             } else {
-                val files = loadFilesInBackground()
-                updateUI(files)
+                loadFiles()
             }
         }
     }
 
-    private suspend fun loadFilesInBackground(): List<File> {
-        kotlinx.coroutines.delay(250)
-
-        val downloadFolder =
-            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath)
-
-        val files = downloadFolder.listFiles { file ->
-            file.isFile &&
-                    (file.extension.equals("jpg", ignoreCase = true) ||
-                            file.extension.equals("png", ignoreCase = true) ||
-                            file.extension.equals("jpeg", ignoreCase = true) ||
-                            file.extension.equals("mp4", ignoreCase = true) ||
-                            file.extension.equals("3gp", ignoreCase = true) ||
-                            file.extension.equals("mkv", ignoreCase = true))
-        }?.toList() ?: emptyList()
-
-        return files.sortedByDescending { it.lastModified() }
+    private fun loadFiles() {
+        viewModel.loadFiles()
     }
 
     private fun updateUI(files: List<File>) {
         binding.progressBar.visibility = View.GONE
+        val arrayList = ArrayList(files)
+        Log.d("TESTING_ADAPTER", "updateUI: ${arrayList.size}")
 
         if (files.isNotEmpty()) {
-            val fileList = ArrayList(files)
-
-            downloadAdapter = DownloadAdapter(fileList)
+            downloadAdapter = DownloadAdapter(arrayList) { isDel ->
+                if (isDel) {
+                    loadFiles()
+                }
+            }
             binding.recyclerView.layoutManager = GridLayoutManager(context, 2)
             binding.recyclerView.adapter = downloadAdapter
 
@@ -149,10 +140,12 @@ class DownloadFragment : Fragment() {
     private fun showCustomPermissionDeniedDialog() {
 
         val dialogFragment = PermissionCheckDialogFragment()
-        dialogFragment.show(
-            requireActivity().supportFragmentManager,
-            "PermissionDeniedDialogFragment"
-        )
+        activity?.let {
+            dialogFragment.show(
+                it.supportFragmentManager,
+                "PermissionDeniedDialogFragment"
+            )
+        }
     }
 
     override fun onResume() {
@@ -163,10 +156,7 @@ class DownloadFragment : Fragment() {
             binding.ivDownloadBox.visibility = View.VISIBLE
             binding.materialTextView.visibility = View.VISIBLE
         } else {
-            lifecycleScope.launch {
-                val files = loadFilesInBackground()
-                updateUI(files)
-            }
+            loadFiles()
         }
     }
 
@@ -196,7 +186,7 @@ class DownloadFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             permissionRequestCount++
-            DataStores.storePermissionRequestCount(permissionRequestCount, requireContext())
+            activity?.let { DataStores.storePermissionRequestCount(permissionRequestCount, it) }
         }
     }
 }

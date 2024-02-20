@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/remove_ad_margin"
-    app:cardCornerRadius="@dimen/edit_text_padding_vertical"
-    app:cardElevation="0dp"
     android:backgroundTint="@color/downloadRecyclerItemColor"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    app:cardCornerRadius="@dimen/edit_text_padding_vertical"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,12 +15,12 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="@dimen/download_image_size"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/download_image_size"
             android:scaleType="centerCrop"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
             android:id="@+id/playIconBg"
@@ -62,26 +62,26 @@
             android:id="@+id/textViewFileName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"
-            android:fontFamily="@font/sf_pro_rounded_medium"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline"
             android:layout_marginStart="@dimen/remove_ad_margin"
-            android:maxLines="1"
             android:layout_marginTop="@dimen/remove_ad_margin"
             android:ellipsize="end"
-            android:textColor="@color/subtitleColor"/>
+            android:fontFamily="@font/sf_pro_rounded_medium"
+            android:maxLines="1"
+            android:textColor="@color/subtitleColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
         <ImageView
             android:id="@+id/ivMenuIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
             android:src="@drawable/ic_menu"
-            app:layout_constraintTop_toTopOf="@+id/textViewFileName"
             app:layout_constraintBottom_toBottomOf="@+id/textViewFileName"
-            app:layout_constraintStart_toEndOf="@+id/guideline"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintTop_toTopOf="@+id/textViewFileName" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

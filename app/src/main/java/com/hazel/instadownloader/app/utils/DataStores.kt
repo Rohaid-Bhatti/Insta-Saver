@@ -15,7 +15,8 @@ object DataStores {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
     private val PERMISSION_REQUEST_COUNT_KEY = intPreferencesKey("PERMISSION_REQUEST_COUNT_KEY")
-    private val BOTTOM_SHEET_SHOWN_KEY = booleanPreferencesKey("BOTTOM_SHEET_SHOWN_KEY")
+//    private val BOTTOM_SHEET_SHOWN_KEY = booleanPreferencesKey("BOTTOM_SHEET_SHOWN_KEY")
+    private val LANGUAGE_SELECTED_KEY = booleanPreferencesKey("LANGUAGE_SELECTED_KEY")
 
     // Function to store the permission request count
     suspend fun storePermissionRequestCount(count: Int, context: Context) {
@@ -31,7 +32,7 @@ object DataStores {
         }
     }
 
-    // Function to store whether the bottom sheet has been shown
+    /*// Function to store whether the bottom sheet has been shown
     suspend fun storeBottomSheetShown(context: Context, shown: Boolean) {
         context.dataStore.edit { settings ->
             settings[BOTTOM_SHEET_SHOWN_KEY] = shown
@@ -42,6 +43,20 @@ object DataStores {
     fun isBottomSheetShown(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { settings ->
             settings[BOTTOM_SHEET_SHOWN_KEY] ?: false
+        }
+    }*/
+
+    // Function to store whether the language activity has been shown
+    suspend fun storeLanguageSelected(context: Context, selected: Boolean) {
+        context.dataStore.edit { settings ->
+            settings[LANGUAGE_SELECTED_KEY] = selected
+        }
+    }
+
+    // Function to check if the language activity has been shown
+    fun isLanguageSelected(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { settings ->
+            settings[LANGUAGE_SELECTED_KEY] ?: false
         }
     }
 }

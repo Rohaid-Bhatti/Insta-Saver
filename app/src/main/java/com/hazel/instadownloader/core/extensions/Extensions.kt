@@ -45,6 +45,14 @@ fun isVideoFile(file: File): Boolean {
     )
 }
 
+fun isImageFile(file: File): Boolean {
+    return file.extension in arrayOf(
+        "jpg",
+        "png",
+        "jpeg"
+    )
+}
+
 fun getVideoDuration(file: File): Long {
     val retriever = MediaMetadataRetriever()
     retriever.setDataSource(file.path)

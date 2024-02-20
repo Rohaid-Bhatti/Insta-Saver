@@ -3,17 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/homeBN"
+        android:id="@+id/homeFragment"
         android:icon="@drawable/home_selector"
         app:showAsAction="ifRoom"
         android:title="@string/home_bn"  />
     <item
-        android:id="@+id/inspectionBN"
+        android:id="@+id/browserFragment"
         android:icon="@drawable/browse_selector"
         app:showAsAction="ifRoom"
         android:title="@string/browser_bn" />
     <item
-        android:id="@+id/settingBN"
+        android:id="@+id/downloadFragment"
         android:icon="@drawable/download_selector"
         app:showAsAction="ifRoom"
         android:title="@string/download_bn" />

@@ -29,7 +29,7 @@ import com.hazel.instadownloader.core.extensions.shareOnWhatsApp
 import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
 import java.io.File
 
-class DownloadAdapter(private val files: ArrayList<File>) :
+class DownloadAdapter(private val files: ArrayList<File>, private val delCallback: (isDel:Boolean) -> Unit) :
     RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DownloadViewHolder {
@@ -41,6 +41,7 @@ class DownloadAdapter(private val files: ArrayList<File>) :
     override fun onBindViewHolder(holder: DownloadViewHolder, position: Int) {
         holder.bind(files[position])
 
+        Log.d("TESTING_ADAPTER", "onBindViewHolder: ${files.size}")
         holder.ivMenuIcon.setOnClickListener {
             showBottomSheet(holder.itemView.context, files[position], position)
         }
@@ -93,7 +94,10 @@ class DownloadAdapter(private val files: ArrayList<File>) :
     private fun deleteFile(file: File) {
         if (file.exists()) {
             file.delete()
+            files.remove(file)
+            delCallback(true)
             notifyDataSetChanged()
+            Log.d("TESTING_ADAPTER", "deleteFile: ${files.size}")
         }
     }
 
@@ -170,10 +174,8 @@ class DownloadAdapter(private val files: ArrayList<File>) :
         override fun onClick(v: View?) {
             if (isVideoFile(file)) {
                 playVideo(itemView.context, adapterPosition)
-                Log.d("CHECKING_VIDEO", "onClick: is video")
             } else {
                 showImage(itemView.context, adapterPosition)
-                Log.d("CHECKING_VIDEO", "onClick: is image")
             }
         }
 

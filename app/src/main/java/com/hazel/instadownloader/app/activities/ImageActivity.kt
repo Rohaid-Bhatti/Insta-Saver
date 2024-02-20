@@ -12,8 +12,9 @@ import com.hazel.instadownloader.databinding.ActivityImageBinding
 import java.io.File
 
 class ImageActivity : AppCompatActivity() {
+    private var imagePagerAdapter: ImagePagerAdapter? = null
     private lateinit var binding: ActivityImageBinding
-    private lateinit var imageUris: List<String>
+    private lateinit var imageUris: MutableList<String>
     private lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +28,8 @@ class ImageActivity : AppCompatActivity() {
         val position = intent.getIntExtra("position", 0)
 
         viewPager = binding.viewPager
-        viewPager.adapter = ImagePagerAdapter(imageUris, this)
+        imagePagerAdapter = ImagePagerAdapter(imageUris, this)
+        viewPager.adapter = imagePagerAdapter
         viewPager.setCurrentItem(position, false)
 
         binding.detailsButton.setOnClickListener {
@@ -81,8 +83,11 @@ class ImageActivity : AppCompatActivity() {
         if (file.exists()) {
             file.delete()
             // Remove the deleted image from the ViewPager and update the adapter
-            imageUris = imageUris.toMutableList().apply { removeAt(position) }
-            viewPager.adapter?.notifyDataSetChanged()
+//            imageUris = imageUris.toMutableList().apply { removeAt(position) }
+            viewPager.currentItem = position-1
+            imageUris.removeAt(position)
+            imagePagerAdapter?.deleteItem(imageUris)
+            imagePagerAdapter?.notifyDataSetChanged()
         }
     }
 }

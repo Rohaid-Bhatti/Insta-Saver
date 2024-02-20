@@ -1,22 +1,20 @@
 package com.hazel.instadownloader
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.hazel.instadownloader.app.activities.LanguageActivity
 import com.hazel.instadownloader.app.utils.DataStores
-import com.hazel.instadownloader.app.utils.PermissionManager
 import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.shareApp
 import com.hazel.instadownloader.databinding.ActivityMainBinding
@@ -31,6 +29,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 //    private var permissionRequestCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,13 +38,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(binding.root)
 
         CoroutineScope(Dispatchers.IO).launch {
-            val isBottomSheetShown = DataStores.isBottomSheetShown(this@MainActivity).first()
-            if (!isBottomSheetShown) {
+            val isLanguageSelected = DataStores.isLanguageSelected(this@MainActivity).first()
+            if (!isLanguageSelected) {
+                showLanguageSelection()
                 showBottomSheet()
-                DataStores.storeBottomSheetShown(this@MainActivity, true)
+                DataStores.storeLanguageSelected(this@MainActivity, true)
             }
         }
-
 
         // for saving the values in to data store
         /*CoroutineScope(Dispatchers.Main).launch {
@@ -58,9 +57,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }*/
 
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
         setUpAppbar()
-        loadFragment(HomeFragment())
-        setUpBottomNavigation()
+        binding.bottomNav.setupWithNavController(navController)
         binding.bottomNav.itemIconTintList = null
         binding.navView.setNavigationItemSelectedListener(this)
     }
@@ -126,30 +128,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }*/
 
-    //for bottom navigation
-    private fun setUpBottomNavigation() = binding.apply {
-        binding.bottomNav.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.homeBN -> {
-                    loadFragment(HomeFragment())
-                    true
-                }
-
-                R.id.inspectionBN -> {
-                    loadFragment(BrowserFragment())
-                    true
-                }
-
-                R.id.settingBN -> {
-                    loadFragment(DownloadFragment())
-                    true
-                }
-
-                else -> false
-            }
-        }
-    }
-
     //for appbar
     private fun setUpAppbar() = binding.appBar.apply {
         myToolbar.title = getString(R.string.app_name)
@@ -170,13 +148,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
     }
 
-    //for fragments
-    private fun loadFragment(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.frameLayout, fragment)
-        transaction.commit()
-    }
-
     //for toolbar
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.app_bar, menu)
@@ -194,9 +165,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return super.onOptionsItemSelected(item)
     }
 
+    // for showing the help bottom sheet
     private fun showBottomSheet() {
         val bottomSheetFragment = HelpFragment()
         bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
+    }
+
+    // for showing the language activity for the first time of the app
+    private fun showLanguageSelection() {
+        val intent = Intent(this, LanguageActivity::class.java)
+        startActivity(intent)
     }
 
     //for navigation drawer option selection
@@ -230,13 +208,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
-            when (supportFragmentManager.findFragmentById(R.id.frameLayout)) {
-                is BrowserFragment, is DownloadFragment -> {
-                    loadFragment(HomeFragment())
-                    binding.bottomNav.selectedItemId = R.id.homeBN
-                }
-                else -> super.onBackPressed()
-            }
+            super.onBackPressed()
         }
     }
 }
