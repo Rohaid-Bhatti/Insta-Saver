@@ -4,6 +4,7 @@
     <dimen name="padding_content_small">6dp</dimen>
     <dimen name="padding_page">10dp</dimen>
     <dimen name="padding_page_large">24dp</dimen>
+    <dimen name="padding_page_Extra_large">32dp</dimen>
     <dimen name="splash_main_text">22sp</dimen>
     <dimen name="splash_subTitle_text">14sp</dimen>
     <dimen name="splash_ad_line_text">12sp</dimen>
@@ -28,5 +29,6 @@
     <dimen name="image_size">40dp</dimen>
     <dimen name="padding_text_small">2dp</dimen>
 
-    <dimen name="download_image_size">180dp</dimen>
+    <dimen name="download_image_size">100dp</dimen>
+    <dimen name="profile_circular_image_size">35dp</dimen>
 </resources>

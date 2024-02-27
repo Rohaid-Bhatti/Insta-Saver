@@ -76,8 +76,8 @@ class BrowserFragment : Fragment() {
         private val context: Context,
     ) {
         @JavascriptInterface
-        fun downloadMedia(message: String) {
-            val fileName = message.substring(message.lastIndexOf('/') + 1)
+        fun downloadMedia(message: String, fileName: String) {
+//            val fileName = message.substring(message.lastIndexOf('/') + 1)
             val downloader = DownloadManager(context)
             downloader.downloadFile(message, fileName)
 

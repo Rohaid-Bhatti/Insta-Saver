@@ -17,6 +17,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager.checkPermission
 import com.hazel.instadownloader.databinding.FragmentDownloadBinding
@@ -109,7 +110,7 @@ class DownloadFragment : Fragment() {
                     loadFiles()
                 }
             }
-            binding.recyclerView.layoutManager = GridLayoutManager(context, 2)
+            binding.recyclerView.layoutManager = LinearLayoutManager(context)
             binding.recyclerView.adapter = downloadAdapter
 
             binding.ivDownloadBox.visibility = View.GONE

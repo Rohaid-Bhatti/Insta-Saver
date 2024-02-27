@@ -28,6 +28,9 @@
     <!--Home Fragment-->
     <string name="et_hint_text">Paste link here...</string>
     <string name="no_downloads">No downloads found yet!</string>
+    <string name="paste_link">Paste Link</string>
+    <string name="recent_downloaded">Recent Downloaded</string>
+    <string name="view_all">View All</string>
 
     <!--Language Activity-->
     <string name="save_btn">Save</string>
@@ -49,4 +52,25 @@
     <string name="permission_denied_title">Permission Request</string>
     <string name="permission_denied_message">Provide permission for the media to be loaded.</string>
     <string name="ok_btn">Allow Access</string>
+
+    <!--Settings Activity-->
+    <string name="setting_title">Settings</string>
+    <string name="upgrade_to">Upgrade to</string>
+    <string name="pro">PRO</string>
+    <string name="setting_cardview_subtitle">Ads free experience</string>
+    <string name="setting_cv_btn_text">Try Pro Now</string>
+    <string name="auto_download">Auto Download</string>
+    <string name="auto_download_subtitle">Auto or manual download setting is preferred</string>
+    <string name="english">English</string>
+    <string name="how_to_download">How to Download</string>
+    <string name="tap_to_show_tutorial">Tap to show tutorial</string>
+    <string name="feedback">Feedback</string>
+    <string name="share_your_feedback">Share your feedback</string>
+    <string name="give_it_a_rating_on_the_play_store">Give it a rating on the Play Store!</string>
+    <string name="share_this_app">Share this app</string>
+    <string name="with_friends_and_family">with friends and family</string>
+    <string name="read_further">Read further</string>
+    <string name="check_the_terms">Check the terms</string>
+    <string name="app_version">App Version</string>
+    <string name="_0_0_1">0.0.1</string>
 </resources>

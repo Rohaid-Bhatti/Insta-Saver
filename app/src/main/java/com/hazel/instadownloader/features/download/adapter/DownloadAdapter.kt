@@ -3,6 +3,7 @@ package com.hazel.instadownloader.features.download.adapter
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -83,7 +84,7 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
             .setTitle("Delete File")
             .setMessage("Are you sure you want to delete this file?")
             .setPositiveButton("Delete") { _, _ ->
-                deleteFile(file)
+                deleteFile(context, file)
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
@@ -91,13 +92,15 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
             .show()
     }
 
-    private fun deleteFile(file: File) {
-        if (file.exists()) {
-            file.delete()
-            files.remove(file)
+    private fun deleteFile(context: Context, file: File) {
+        val contentUri = MediaStore.Files.getContentUri("external")
+        val selection = "${MediaStore.Files.FileColumns.DATA} = ?"
+        val selectionArgs = arrayOf(file.absolutePath)
+        val rowsDeleted = context.contentResolver.delete(contentUri, selection, selectionArgs)
+        if (rowsDeleted > 0) {
             delCallback(true)
+            files.remove(file)
             notifyDataSetChanged()
-            Log.d("TESTING_ADAPTER", "deleteFile: ${files.size}")
         }
     }
 
@@ -130,14 +133,16 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
         }
     }
 
-    class DownloadViewHolder(itemView: View, var files: List<File>) :
+    class DownloadViewHolder(itemView: View, private var files: List<File>) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
         private val playIcon: ImageView = itemView.findViewById(R.id.ivPlayIcon)
         private val textViewFileName: TextView = itemView.findViewById(R.id.textViewFileName)
-        private val textViewDuration: TextView = itemView.findViewById(R.id.textViewDuration)
-        private val playIconBg: LinearLayout = itemView.findViewById(R.id.playIconBg)
+//        private val textViewDuration: TextView = itemView.findViewById(R.id.textViewDuration)
+//        private val playIconBg: LinearLayout = itemView.findViewById(R.id.playIconBg)
         val ivMenuIcon: ImageView = itemView.findViewById(R.id.ivMenuIcon)
+        private val textViewCaption: TextView = itemView.findViewById(R.id.textViewCaption)
+        private val ivInstagramIcon: ImageView = itemView.findViewById(R.id.ivInstagramIcon)
 
         private lateinit var file: File
 
@@ -151,19 +156,24 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
                 playIcon.visibility = View.VISIBLE
                 playIcon.contentDescription = "Play video"
 
-                val duration = getVideoDuration(file)
-                val formattedDuration = formatVideoDuration(duration)
-                textViewDuration.text = formattedDuration
-                textViewDuration.visibility = View.VISIBLE
+//                val duration = getVideoDuration(file)
+//                val formattedDuration = formatVideoDuration(duration)
+//                textViewDuration.text = formattedDuration
+//                textViewDuration.visibility = View.VISIBLE
                 textViewFileName.text = file.name
 
-                playIconBg.visibility = View.VISIBLE
+//                playIconBg.visibility = View.VISIBLE
             } else {
                 playIcon.visibility = View.GONE
-                textViewDuration.visibility = View.GONE
+//                textViewDuration.visibility = View.GONE
                 textViewFileName.text = file.name
 
-                playIconBg.visibility = View.GONE
+//                playIconBg.visibility = View.GONE
+            }
+
+            textViewCaption.text = "This is for the testing purpose"
+            ivInstagramIcon.setOnClickListener {
+                Toast.makeText(itemView.context, "View on instagram functionality", Toast.LENGTH_SHORT).show()
             }
 
             Glide.with(itemView.context)

@@ -10,19 +10,28 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/edit_text_padding_vertical">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/download_image_size"
             android:layout_height="@dimen/download_image_size"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/ivPlayIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/play_icon"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView"
+            app:layout_constraintEnd_toEndOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="@id/imageView" />
+
+        <!--<LinearLayout
             android:id="@+id/playIconBg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,7 +58,7 @@
                 android:layout_marginStart="@dimen/padding_text_small"
                 android:textColor="@color/white"
                 android:visibility="gone" />
-        </LinearLayout>
+        </LinearLayout>-->
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline"
@@ -58,29 +67,69 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.75" />
 
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="@dimen/profile_circular_image_size"
+            android:layout_height="@dimen/profile_circular_image_size"
+            android:src="@drawable/purtgal"
+            app:layout_constraintBottom_toTopOf="@+id/textViewCaption"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/remove_ad_margin"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
         <TextView
             android:id="@+id/textViewFileName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/remove_ad_margin"
-            android:layout_marginTop="@dimen/remove_ad_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/sf_pro_rounded_bold"
+            android:maxLines="1"
+            android:textColor="@color/subtitleColor"
+            app:layout_constraintBottom_toBottomOf="@+id/ivProfile"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintStart_toEndOf="@+id/ivProfile"
+            app:layout_constraintTop_toTopOf="@+id/ivProfile" />
+
+        <TextView
+            android:id="@+id/textViewCaption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/remove_ad_margin"
             android:ellipsize="end"
             android:fontFamily="@font/sf_pro_rounded_medium"
             android:maxLines="1"
-            android:textColor="@color/subtitleColor"
+            android:textColor="@color/ViewAllColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toBottomOf="@+id/ivProfile" />
+
+        <ImageView
+            android:id="@+id/ivInstagramIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/padding_content_small"
+            android:src="@drawable/view_on_instagram_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewCaption"
+            app:layout_constraintEnd_toStartOf="@+id/ivMenuIcon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@+id/textViewFileName"
+            app:layout_constraintTop_toTopOf="@+id/textViewFileName" />
 
         <ImageView
             android:id="@+id/ivMenuIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_menu"
-            app:layout_constraintBottom_toBottomOf="@+id/textViewFileName"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewCaption"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/guideline"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ivInstagramIcon"
             app:layout_constraintTop_toTopOf="@+id/textViewFileName" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -16,11 +16,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.hazel.instadownloader.R
+import com.hazel.instadownloader.core.database.DownloadedUrl
+import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
 import com.hazel.instadownloader.core.extensions.formatVideoDuration
 import com.hazel.instadownloader.core.extensions.getVideoDuration
 import com.hazel.instadownloader.core.extensions.isImageFile
@@ -36,6 +39,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var latestDownloadedMediaFile: File? = null
+//    private var downloadedUrlViewModel: DownloadedUrlViewModel? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,8 +52,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        downloadedUrlViewModel = ViewModelProvider(this)[DownloadedUrlViewModel::class.java]
+
         if (!Python.isStarted()) {
-            activity?.let { AndroidPlatform(it) }?.let { Python.start(it)}
+            activity?.let { AndroidPlatform(it) }?.let { Python.start(it) }
         }
 
         val py = Python.getInstance()
@@ -58,7 +64,8 @@ class HomeFragment : Fragment() {
         val posts = module["post_count"]
         val linkDownloader = module["download_post_from_link"]
 
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        view.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 copyUrl()
@@ -80,21 +87,23 @@ class HomeFragment : Fragment() {
             )
         }
 
-        binding.ivDownloadIcon.setOnClickListener {
+        binding.tvDownload.setOnClickListener {
+//            fileName = generateFileNameFromUrl(url)
             downloadFun(linkDownloader, posts, downloader)
         }
     }
 
     private fun updateLatestDownloadedMediaFile() {
-        latestDownloadedMediaFile = getLatestDownloadedFile("/storage/emulated/0/Download/InstaDownloader")
+        latestDownloadedMediaFile =
+            getLatestDownloadedFile("/storage/emulated/0/Download/InstaDownloader")
 
         Log.d("DOWNLOAD_MEDIA", "updateLatestDownloadedMediaFile: it is calling")
         latestDownloadedMediaFile?.let { file ->
             displayDownloadedMedia(file)
-            binding.container.visibility = View.VISIBLE
+            binding.layoutVideo.visibility = View.VISIBLE
             binding.StatusText.visibility = View.GONE
         } ?: run {
-            binding.container.visibility = View.GONE
+            binding.layoutVideo.visibility = View.GONE
             binding.StatusText.visibility = View.VISIBLE
         }
     }
@@ -112,124 +121,138 @@ class HomeFragment : Fragment() {
     }
 
     private fun downloadFun(linkDownloader: PyObject?, posts: PyObject?, downloader: PyObject?) {
-        if (binding.etUrl.text.toString() != "") {
-            Toast.makeText(requireContext(), "Download Started", Toast.LENGTH_LONG).show()
+//        CoroutineScope(Dispatchers.IO).launch {
+        try {
+            if (binding.etUrl.text.toString() != "") {
+                Toast.makeText(requireContext(), "Download Started", Toast.LENGTH_LONG).show()
 
-            if (binding.etUrl.text.toString()
-                    .startsWith("https://www.instagram.com/")
-            ) { // checks if the text is a valid instagram link
-                // Post shortcode is a part of the Post URL, https://www.instagram.com/p/SHORTCODE/
-                val url = binding.etUrl.text.toString()
-                var postShortcode = ""
-                if (url.startsWith("https://www.instagram.com/p/")) {
-                    postShortcode =
-                        url.substringAfter("https://www.instagram.com/p/").substringBefore("/")
-                } else if (url.startsWith("https://www.instagram.com/reel/")) {
-                    postShortcode = url.substringAfter("https://www.instagram.com/reel/")
-                        .substringBefore("/")
-                }
+                if (binding.etUrl.text.toString()
+                        .startsWith("https://www.instagram.com/")
+                ) { // checks if the text is a valid instagram link
+                    // Post shortcode is a part of the Post URL, https://www.instagram.com/p/SHORTCODE/
+                    val url = binding.etUrl.text.toString()
+                    var postShortcode = ""
+                    if (url.startsWith("https://www.instagram.com/p/")) {
+                        postShortcode =
+                            url.substringAfter("https://www.instagram.com/p/")
+                                .substringBefore("/")
+                    } else if (url.startsWith("https://www.instagram.com/reel/")) {
+                        postShortcode = url.substringAfter("https://www.instagram.com/reel/")
+                            .substringBefore("/")
+                    }
 
-                Log.d("DOWNLOAD_LINK", "onCreate: $linkDownloader")
+                    Log.d("DOWNLOAD_LINK", "onCreate: $linkDownloader")
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        linkDownloader?.call(postShortcode)
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(
-                                requireContext(),
-                                "Download Finished",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            updateLatestDownloadedMediaFile()
-                            binding.StatusText.text = "Download Status: Finished"
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            linkDownloader?.call(postShortcode)
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Download Finished",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                updateLatestDownloadedMediaFile()
+                                //   val downloadedUrl = DownloadedUrl(url = url, fileName = "fileName")
+                                //    downloadedUrlViewModel?.insertDownloadedUrl(downloadedUrl)
+                                binding.StatusText.text = "Download Status: Finished"
+                            }
+
+                            Log.d("DOWNLOAD_LINK", "onCreate: $linkDownloader")
+
+                        } catch (error: Throwable) {
+                            activity?.runOnUiThread {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Something went wrong",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                val errorName = error.toString().split(":")
+                                binding.StatusText.text = errorName.toString()
+                            }
                         }
-
-                        Log.d("DOWNLOAD_LINK", "onCreate: $linkDownloader")
-
+                    }
+                } else { // if the text is not a link, it must  be an instagram username
+                    try {
+                        binding.StatusText.text =
+                            "Found ${posts?.call(binding.etUrl.text.toString())} posts, Downloading..."
                     } catch (error: Throwable) {
-                        activity?.runOnUiThread {
-                            Toast.makeText(
-                                requireContext(),
-                                "Something went wrong",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            val errorName = error.toString().split(":")
-                            binding.StatusText.text = errorName.toString()
+                        Toast.makeText(
+                            requireContext(),
+                            "Something went wrong",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                        val errorName = error.toString().split(":")
+                        binding.StatusText.text = errorName[errorName.size - 1]
+                    }
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            downloader?.call(binding.etUrl.text.toString())
+                            activity?.runOnUiThread {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Download Finished",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                binding.StatusText.text = "Download Status: Finished"
+                            }
+                        } catch (error: Throwable) {
+                            requireActivity().runOnUiThread {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Something went wrong",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                val errorName = error.toString().split(":")
+                                binding.StatusText.text = errorName[errorName.size - 1]
+                            }
                         }
                     }
                 }
-            } else { // if the text is not a link, it must  be an instagram username
-                try {
-                    binding.StatusText.text =
-                        "Found ${posts?.call(binding.etUrl.text.toString())} posts, Downloading..."
-                } catch (error: Throwable) {
-                    Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_LONG)
-                        .show()
-                    val errorName = error.toString().split(":")
-                    binding.StatusText.text = errorName[errorName.size - 1]
-                }
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        downloader?.call(binding.etUrl.text.toString())
-                        activity?.runOnUiThread {
-                            Toast.makeText(
-                                requireContext(),
-                                "Download Finished",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            binding.StatusText.text = "Download Status: Finished"
-                        }
-                    } catch (error: Throwable) {
-                        requireActivity().runOnUiThread {
-                            Toast.makeText(
-                                requireContext(),
-                                "Something went wrong",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            val errorName = error.toString().split(":")
-                            binding.StatusText.text = errorName[errorName.size - 1]
-                        }
-                    }
-                }
+            } else {
+                Toast.makeText(requireContext(), "Empty Field", Toast.LENGTH_LONG).show()
             }
-        } else {
-            Toast.makeText(requireContext(), "Empty Field", Toast.LENGTH_LONG).show()
+        } catch (error: Throwable) {
+            Log.e("DOWNLOAD_FUNCTION", "downloadFun: ", error)
         }
+        /* }*/
     }
 
     private fun displayDownloadedMedia(mediaUri: File) {
-        val downloadItemView = LayoutInflater.from(requireContext()).inflate(R.layout.item_download, null)
+        val downloadItemView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.item_download, null)
         val imageView = downloadItemView.findViewById<ImageView>(R.id.imageView)
-        val playIconBg = downloadItemView.findViewById<LinearLayout>(R.id.playIconBg)
+//        val playIconBg = downloadItemView.findViewById<LinearLayout>(R.id.playIconBg)
         val ivPlayIcon = downloadItemView.findViewById<ImageView>(R.id.ivPlayIcon)
-        val textViewDuration = downloadItemView.findViewById<TextView>(R.id.textViewDuration)
+//        val textViewDuration = downloadItemView.findViewById<TextView>(R.id.textViewDuration)
         val textViewFileName = downloadItemView.findViewById<TextView>(R.id.textViewFileName)
         val ivMenuIcon = downloadItemView.findViewById<ImageView>(R.id.ivMenuIcon)
 
         if (isImageFile(mediaUri)) {
-            binding.container.visibility = View.VISIBLE
+            binding.layoutVideo.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
                 .into(imageView)
             imageView.visibility = View.VISIBLE
-            playIconBg.visibility = View.GONE
+//            playIconBg.visibility = View.GONE
             ivPlayIcon.visibility = View.GONE
-            textViewDuration.visibility = View.GONE
+//            textViewDuration.visibility = View.GONE
         } else if (isVideoFile(mediaUri)) {
-            binding.container.visibility = View.VISIBLE
+            binding.layoutVideo.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
                 .into(imageView)
             imageView.visibility = View.VISIBLE
-            playIconBg.visibility = View.VISIBLE
+//            playIconBg.visibility = View.VISIBLE
             ivPlayIcon.visibility = View.VISIBLE
-            textViewDuration.visibility = View.VISIBLE
-            val duration = getVideoDuration(mediaUri)
-            val formattedDuration = formatVideoDuration(duration)
-            textViewDuration.text = formattedDuration
+//            textViewDuration.visibility = View.VISIBLE
+//            val duration = getVideoDuration(mediaUri)
+//            val formattedDuration = formatVideoDuration(duration)
+//            textViewDuration.text = formattedDuration
         } else {
-            binding.container.visibility = View.GONE
+            binding.layoutVideo.visibility = View.GONE
         }
 
         textViewFileName.text = mediaUri.name

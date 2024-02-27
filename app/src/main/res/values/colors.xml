@@ -15,4 +15,9 @@
     <color name="downloadRecyclerItemColor">#F3F3F3</color>
 
     <color name="playBackgroundColor">#801D2939</color>
+    <color name="ViewAllColor">#737B82</color>
+    <color name="PermissionDialogColor">#F5F5F5</color>
+    <color name="DownloadFragmentColor">#727B82</color>
+    <color name="SettingScreenCardGradientColor">#F6B501</color>
+    <color name="SettingButtonBgColor">#40FFFFFF</color>
 </resources>

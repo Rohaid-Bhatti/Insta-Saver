@@ -56,7 +56,7 @@
         android:id="@+id/pb_linearProgress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/padding_page"
+        android:layout_marginBottom="@dimen/edit_text_padding_horizontal"
         app:indicatorColor="@color/titleColor"
         app:trackCornerRadius="@dimen/padding_content_small"
         app:layout_constraintBottom_toTopOf="@+id/tv_ads"

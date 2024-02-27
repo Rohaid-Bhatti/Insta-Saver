@@ -4,6 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     app:cardCornerRadius="@dimen/edit_text_padding_horizontal"
+    android:layout_gravity="center"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".features.dialogBox.PermissionCheckDialogFragment">
 
@@ -11,7 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/padding_page_large">
-
         <ImageView
             android:id="@+id/ivDialogIcon"
             android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
             app:layout_constraintTop_toBottomOf="@+id/ivDialogIcon"
             android:layout_marginTop="@dimen/remove_ad_margin"
             android:fontFamily="@font/sf_pro_rounded_bold"
-            android:textColor="@color/subtitleColor"
+            android:textColor="@color/titleColor"
             android:textSize="@dimen/remove_ad_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -52,7 +52,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/ok_btn"
-            android:backgroundTint="@color/titleColor"
+            android:textColor="@color/subtitleColor"
+            android:backgroundTint="@color/PermissionDialogColor"
             android:fontFamily="@font/sf_pro_rounded_bold"
             android:layout_marginTop="@dimen/remove_ad_margin"
             android:paddingHorizontal="@dimen/image_size"

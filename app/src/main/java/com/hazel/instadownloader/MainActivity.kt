@@ -14,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.hazel.instadownloader.app.activities.LanguageActivity
+import com.hazel.instadownloader.app.activities.SettingActivity
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.shareApp
@@ -187,7 +188,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
 
             R.id.nav_terms -> Toast.makeText(this, "Terms!", Toast.LENGTH_SHORT).show()
-            R.id.nav_privacy -> Toast.makeText(this, "Privacy!", Toast.LENGTH_SHORT).show()
+            R.id.nav_privacy -> {
+                val intent = Intent(this, SettingActivity::class.java)
+                startActivity(intent)
+                return true
+            }
             R.id.nav_feedback -> Toast.makeText(this, "Feedback!", Toast.LENGTH_SHORT).show()
             R.id.nav_share -> {
                 debounce(binding.root) {
