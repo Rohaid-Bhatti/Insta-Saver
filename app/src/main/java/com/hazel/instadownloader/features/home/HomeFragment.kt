@@ -91,6 +91,7 @@ class HomeFragment : Fragment() {
 //            fileName = generateFileNameFromUrl(url)
             downloadFun(linkDownloader, posts, downloader)
         }
+
     }
 
     private fun updateLatestDownloadedMediaFile() {
@@ -268,8 +269,8 @@ class HomeFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
 
         if (binding.etUrl.text.toString().trim().isEmpty()) {
             copyUrl()

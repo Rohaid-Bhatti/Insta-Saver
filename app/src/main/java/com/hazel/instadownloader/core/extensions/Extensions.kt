@@ -1,16 +1,23 @@
 package com.hazel.instadownloader.core.extensions
 
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.os.SystemClock
+import android.provider.MediaStore
 import android.view.View
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.hazel.instadownloader.R
+import com.hazel.instadownloader.app.activities.ImageActivity
+import com.hazel.instadownloader.app.activities.PlayerActivity
 import com.hazel.instadownloader.app.utils.SHARE_APP_INTENT_TAG
+import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import java.io.File
-
 
 fun Context.shareApp() {
     val shareIntent = Intent(Intent.ACTION_SEND)
@@ -116,4 +123,26 @@ fun shareFileToInstagram(context: Context, file: File, isVideo: Boolean) {
     }
 
     context.startActivity(chooserIntent)
+}
+
+fun playVideo(context: Context, position: Int , files: List<File>) {
+    val filteredVideos = files.filter { isVideoFile(it) }
+    val videoUris = filteredVideos.map { it.toUri().toString() }
+    val clickedFile = files[position]
+    val clickedVideoIndex = filteredVideos.indexOf(clickedFile)
+    val intent = Intent(context, PlayerActivity::class.java)
+    intent.putStringArrayListExtra("videoUri", ArrayList(videoUris))
+    intent.putExtra("positionVideo", clickedVideoIndex)
+    context.startActivity(intent)
+}
+
+fun showImage(context: Context, position: Int , files: List<File>) {
+    val filteredImages = files.filter { !isVideoFile(it) }
+    val imageUris = filteredImages.map { it.toUri().toString() }
+    val clickedFile = files[position]
+    val clickedImageIndex = filteredImages.indexOf(clickedFile)
+    val intent = Intent(context, ImageActivity::class.java)
+    intent.putStringArrayListExtra("imageUris", ArrayList(imageUris))
+    intent.putExtra("position", clickedImageIndex)
+    context.startActivity(intent)
 }

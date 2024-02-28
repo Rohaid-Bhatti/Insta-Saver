@@ -1,26 +1,26 @@
 package com.hazel.instadownloader.features.download
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager.checkPermission
 import com.hazel.instadownloader.databinding.FragmentDownloadBinding
+import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import com.hazel.instadownloader.features.dialogBox.PermissionCheckDialogFragment
 import com.hazel.instadownloader.features.download.adapter.DownloadAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -28,8 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.log
 
-class DownloadFragment : Fragment() {
+class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     private lateinit var viewModel: DownloadViewModel
     private lateinit var downloadAdapter: DownloadAdapter
     private var _binding: FragmentDownloadBinding? = null
@@ -62,6 +63,7 @@ class DownloadFragment : Fragment() {
         }
 
     private var permissionRequestCount = 0
+    private var isSelect = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,6 +81,9 @@ class DownloadFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
         binding.ivDownloadBox.visibility = View.GONE
         binding.materialTextView.visibility = View.GONE
+        binding.btnDelete.visibility = View.GONE
+        binding.checkBoxSelectAll.visibility = View.GONE
+        binding.textViewSelectedCount.visibility = View.GONE
 
         viewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
             updateUI(files)
@@ -93,6 +98,58 @@ class DownloadFragment : Fragment() {
                 loadFiles()
             }
         }
+
+        binding.btnDelete.setOnClickListener {
+//            downloadAdapter.deleteSelectedFiles()
+            showDeleteDialog()
+            toggleDeleteButtonVisibility(false)
+        }
+
+        binding.checkBoxSelectAll.setOnClickListener {
+            if (!isSelect) {
+                isSelect = true
+                downloadAdapter.selectAllItems(this.isSelect)
+            } else {
+                isSelect = false
+                downloadAdapter.selectAllItems(this.isSelect)
+            }
+        }
+
+        initBackPressDispatcher()
+    }
+
+    private fun showDeleteDialog() {
+        val dialog = DeleteConfirmationDialogFragment(downloadAdapter.selectedFiles.size.toString()) {
+            downloadAdapter.deleteSelectedFiles()
+        }
+        dialog.show(
+            (context as AppCompatActivity).supportFragmentManager,
+            "DeleteConfirmationDialog"
+        )
+    }
+
+    private fun toggleDeleteButtonVisibility(isVisible: Boolean) {
+        binding.btnDelete.visibility = if (isVisible) View.VISIBLE else View.GONE
+        binding.textViewSelectedCount.visibility = if (isVisible) View.VISIBLE else View.GONE
+        binding.checkBoxSelectAll.visibility = if (isVisible) View.VISIBLE else View.GONE
+    }
+
+    override fun onSelectionModeEnabled(enabled: Boolean) {
+        if (enabled) {
+            binding.btnDelete.visibility = View.VISIBLE
+            binding.textViewSelectedCount.visibility = View.VISIBLE
+            binding.checkBoxSelectAll.visibility = View.VISIBLE
+
+            "${downloadAdapter.selectedFiles.size} Selected".also {
+                binding.textViewSelectedCount.text = it
+            }
+            val allFilesSelected = downloadAdapter.isAllSelected
+            binding.checkBoxSelectAll.isChecked = allFilesSelected
+        } else {
+            binding.btnDelete.visibility = View.GONE
+            binding.textViewSelectedCount.visibility = View.GONE
+            binding.checkBoxSelectAll.visibility = View.GONE
+        }
     }
 
     private fun loadFiles() {
@@ -102,16 +159,23 @@ class DownloadFragment : Fragment() {
     private fun updateUI(files: List<File>) {
         binding.progressBar.visibility = View.GONE
         val arrayList = ArrayList(files)
-        Log.d("TESTING_ADAPTER", "updateUI: ${arrayList.size}")
 
         if (files.isNotEmpty()) {
             downloadAdapter = DownloadAdapter(arrayList) { isDel ->
                 if (isDel) {
                     loadFiles()
                 }
+                toggleDeleteButtonVisibility(downloadAdapter.isSelectionModeEnabled)
             }
+            downloadAdapter.setSelectionModeListener(this)
+
             binding.recyclerView.layoutManager = LinearLayoutManager(context)
             binding.recyclerView.adapter = downloadAdapter
+            binding.btnDelete.visibility = View.GONE
+            binding.textViewSelectedCount.visibility = View.GONE
+            binding.checkBoxSelectAll.visibility = View.GONE
+
+            toggleDeleteButtonVisibility(false)
 
             binding.ivDownloadBox.visibility = View.GONE
             binding.materialTextView.visibility = View.GONE
@@ -189,5 +253,22 @@ class DownloadFragment : Fragment() {
             permissionRequestCount++
             activity?.let { DataStores.storePermissionRequestCount(permissionRequestCount, it) }
         }
+    }
+
+    private fun initBackPressDispatcher() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (downloadAdapter.isSelectionModeEnabled) {
+                        downloadAdapter.selectAllItems(false)
+                        downloadAdapter.isSelectionModeEnabled = false
+                        downloadAdapter.notifyDataSetChanged()
+                        Log.d("TESTING_FILES", "handleOnBackPressed: ${downloadAdapter.isSelectionModeEnabled}")
+                    } else {
+                        findNavController().navigateUp()
+                    }
+                }
+            })
     }
 }

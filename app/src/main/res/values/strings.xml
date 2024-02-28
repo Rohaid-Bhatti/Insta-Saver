@@ -73,4 +73,8 @@
     <string name="check_the_terms">Check the terms</string>
     <string name="app_version">App Version</string>
     <string name="_0_0_1">0.0.1</string>
+
+    <!--Delete Dialog box-->
+    <string name="delete_dialog_box">Delete!</string>
+    <string name="desc_delete_dialogbox">Do you want to delete?</string>
 </resources>

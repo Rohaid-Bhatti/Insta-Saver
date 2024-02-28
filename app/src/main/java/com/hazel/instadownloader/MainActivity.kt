@@ -1,14 +1,14 @@
 package com.hazel.instadownloader
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -19,14 +19,12 @@ import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.shareApp
 import com.hazel.instadownloader.databinding.ActivityMainBinding
-import com.hazel.instadownloader.features.browser.BrowserFragment
-import com.hazel.instadownloader.features.download.DownloadFragment
 import com.hazel.instadownloader.features.bottomSheets.HelpFragment
-import com.hazel.instadownloader.features.home.HomeFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
@@ -66,6 +64,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomNav.setupWithNavController(navController)
         binding.bottomNav.itemIconTintList = null
         binding.navView.setNavigationItemSelectedListener(this)
+
+        val intent = intent
+        val action = intent.action
+        val type = intent.type
+        if ("android.intent.action.SEND" == action && type != null && "text/plain" == type) {
+            val intent1 = intent.getStringExtra("android.intent.extra.TEXT")
+            Log.d("TESTING_FILES", "onCreate: $intent1")
+        }
     }
 
     /*private fun handlePermissionDenied() {

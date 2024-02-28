@@ -1,37 +1,49 @@
 package com.hazel.instadownloader.features.download.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.hazel.instadownloader.R
-import com.hazel.instadownloader.app.activities.ImageActivity
-import com.hazel.instadownloader.app.activities.PlayerActivity
-import com.hazel.instadownloader.core.extensions.formatVideoDuration
-import com.hazel.instadownloader.core.extensions.getVideoDuration
 import com.hazel.instadownloader.core.extensions.isVideoFile
+import com.hazel.instadownloader.core.extensions.playVideo
 import com.hazel.instadownloader.core.extensions.shareFile
 import com.hazel.instadownloader.core.extensions.shareFileToInstagram
 import com.hazel.instadownloader.core.extensions.shareOnWhatsApp
+import com.hazel.instadownloader.core.extensions.showImage
 import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
+import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import java.io.File
 
-class DownloadAdapter(private val files: ArrayList<File>, private val delCallback: (isDel:Boolean) -> Unit) :
+class DownloadAdapter(
+    private val files: ArrayList<File>,
+    private val delCallback: (isDel: Boolean) -> Unit
+) :
     RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
+
+    val selectedFiles = HashSet<File>()
+    var isSelectionModeEnabled = false
+    private var selectionModeListener: SelectionModeListener? = null
+    var isAllSelected = false
+
+    interface SelectionModeListener {
+        fun onSelectionModeEnabled(enabled: Boolean)
+    }
+
+    fun setSelectionModeListener(listener: SelectionModeListener) {
+        selectionModeListener = listener
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DownloadViewHolder {
         val view =
@@ -40,18 +52,60 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
     }
 
     override fun onBindViewHolder(holder: DownloadViewHolder, position: Int) {
-        holder.bind(files[position])
+        val file = files[position]
+        holder.bind(file)
 
-        Log.d("TESTING_ADAPTER", "onBindViewHolder: ${files.size}")
         holder.ivMenuIcon.setOnClickListener {
             showBottomSheet(holder.itemView.context, files[position], position)
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun toggleSelection(file: File, onAllAdded: () -> Unit) {
+        if (selectedFiles.contains(file)) {
+            selectedFiles.remove(file)
+            onAllAdded()
+        } else {
+            selectedFiles.add(file)
+            onAllAdded()
+        }
+
+        selectionModeListener?.onSelectionModeEnabled(selectedFiles.isNotEmpty())
+        notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun selectAllItems(selectAll: Boolean) {
+        if (selectAll) {
+            selectedFiles.addAll(files)
+        } else {
+            selectedFiles.clear()
+        }
+        updateAllSelectedStatus()
+        notifyDataSetChanged()
+        selectionModeListener?.onSelectionModeEnabled(selectedFiles.isNotEmpty())
+    }
+
+    private fun updateAllSelectedStatus() {
+        isAllSelected = selectedFiles.size == files.size
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun deleteSelectedFiles() {
+        selectedFiles.forEach { file ->
+            file.delete()
+        }
+        selectedFiles.clear()
+        isSelectionModeEnabled = false
+        notifyDataSetChanged()
+        delCallback(true)
     }
 
     override fun getItemCount(): Int = files.size
 
     private fun showBottomSheet(context: Context, file: File, position: Int) {
         val bottomSheetFragment = DownloadMenu()
+
         bottomSheetFragment.setOnOptionClickListener(object : DownloadMenu.OnOptionClickListener {
             override fun onRepostInstagramClicked() {
                 shareFileToInstagram(context, file, isVideoFile(file))
@@ -73,6 +127,7 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
                 showDeleteConfirmationDialog(context, file)
             }
         })
+
         bottomSheetFragment.show(
             (context as AppCompatActivity).supportFragmentManager,
             bottomSheetFragment.tag
@@ -80,18 +135,16 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
     }
 
     private fun showDeleteConfirmationDialog(context: Context, file: File) {
-        AlertDialog.Builder(context)
-            .setTitle("Delete File")
-            .setMessage("Are you sure you want to delete this file?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteFile(context, file)
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
+        val dialog = DeleteConfirmationDialogFragment("1") {
+            deleteFile(context, file)
+        }
+        dialog.show(
+            (context as AppCompatActivity).supportFragmentManager,
+            "DeleteConfirmationDialog"
+        )
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun deleteFile(context: Context, file: File) {
         val contentUri = MediaStore.Files.getContentUri("external")
         val selection = "${MediaStore.Files.FileColumns.DATA} = ?"
@@ -133,16 +186,15 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
         }
     }
 
-    class DownloadViewHolder(itemView: View, private var files: List<File>) :
+    inner class DownloadViewHolder(itemView: View, private var files: List<File>) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
         private val playIcon: ImageView = itemView.findViewById(R.id.ivPlayIcon)
         private val textViewFileName: TextView = itemView.findViewById(R.id.textViewFileName)
-//        private val textViewDuration: TextView = itemView.findViewById(R.id.textViewDuration)
-//        private val playIconBg: LinearLayout = itemView.findViewById(R.id.playIconBg)
         val ivMenuIcon: ImageView = itemView.findViewById(R.id.ivMenuIcon)
         private val textViewCaption: TextView = itemView.findViewById(R.id.textViewCaption)
         private val ivInstagramIcon: ImageView = itemView.findViewById(R.id.ivInstagramIcon)
+        private val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
 
         private lateinit var file: File
 
@@ -150,30 +202,48 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
             itemView.setOnClickListener(this)
         }
 
+        @SuppressLint("SetTextI18n")
         fun bind(file: File) {
             this.file = file
+
+            checkBox.visibility = if (isSelectionModeEnabled) View.VISIBLE else View.GONE
+            ivMenuIcon.visibility = if (isSelectionModeEnabled) View.GONE else View.VISIBLE
+            ivInstagramIcon.visibility = if (isSelectionModeEnabled) View.GONE else View.VISIBLE
+
+            checkBox.isChecked = selectedFiles.contains(file)
+
+            itemView.setOnLongClickListener {
+                isSelectionModeEnabled = true
+                toggleSelection(file) {
+                    isAllSelected = files.size == selectedFiles.size
+                }
+                true
+            }
+
+            if (isSelectionModeEnabled) {
+                itemView.setOnClickListener {
+                    toggleSelection(file) {
+                       isAllSelected = files.size == selectedFiles.size
+                    }
+                }
+            }
+
             if (isVideoFile(file)) {
                 playIcon.visibility = View.VISIBLE
                 playIcon.contentDescription = "Play video"
-
-//                val duration = getVideoDuration(file)
-//                val formattedDuration = formatVideoDuration(duration)
-//                textViewDuration.text = formattedDuration
-//                textViewDuration.visibility = View.VISIBLE
                 textViewFileName.text = file.name
-
-//                playIconBg.visibility = View.VISIBLE
             } else {
                 playIcon.visibility = View.GONE
-//                textViewDuration.visibility = View.GONE
                 textViewFileName.text = file.name
-
-//                playIconBg.visibility = View.GONE
             }
 
             textViewCaption.text = "This is for the testing purpose"
             ivInstagramIcon.setOnClickListener {
-                Toast.makeText(itemView.context, "View on instagram functionality", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    itemView.context,
+                    "View on instagram functionality",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             Glide.with(itemView.context)
@@ -183,32 +253,10 @@ class DownloadAdapter(private val files: ArrayList<File>, private val delCallbac
 
         override fun onClick(v: View?) {
             if (isVideoFile(file)) {
-                playVideo(itemView.context, adapterPosition)
+                playVideo(itemView.context, adapterPosition, files)
             } else {
-                showImage(itemView.context, adapterPosition)
+                showImage(itemView.context, adapterPosition, files)
             }
-        }
-
-        private fun playVideo(context: Context, position: Int) {
-            val filteredVideos = files.filter { isVideoFile(it) }
-            val videoUris = filteredVideos.map { it.toUri().toString() }
-            val clickedFile = files[position]
-            val clickedVideoIndex = filteredVideos.indexOf(clickedFile)
-            val intent = Intent(context, PlayerActivity::class.java)
-            intent.putStringArrayListExtra("videoUri", ArrayList(videoUris))
-            intent.putExtra("positionVideo", clickedVideoIndex)
-            context.startActivity(intent)
-        }
-
-        private fun showImage(context: Context, position: Int) {
-            val filteredImages = files.filter { !isVideoFile(it) }
-            val imageUris = filteredImages.map { it.toUri().toString() }
-            val clickedFile = files[position]
-            val clickedImageIndex = filteredImages.indexOf(clickedFile)
-            val intent = Intent(context, ImageActivity::class.java)
-            intent.putStringArrayListExtra("imageUris", ArrayList(imageUris))
-            intent.putExtra("position", clickedImageIndex)
-            context.startActivity(intent)
         }
     }
 }

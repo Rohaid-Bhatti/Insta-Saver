@@ -1,5 +1,6 @@
 package com.hazel.instadownloader.app.activities
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +9,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.app.adapters.ImagePagerAdapter
+import com.hazel.instadownloader.core.extensions.shareFile
 import com.hazel.instadownloader.databinding.ActivityImageBinding
+import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import java.io.File
 
 class ImageActivity : AppCompatActivity() {
@@ -37,11 +40,11 @@ class ImageActivity : AppCompatActivity() {
         }
 
         binding.shareButton.setOnClickListener {
-            shareImage(Uri.parse(imageUris[viewPager.currentItem]))
+            shareFile(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
         }
 
         binding.deleteButton.setOnClickListener {
-            confirmDeleteImage(viewPager.currentItem)
+            showDeleteConfirmationDialog(viewPager.currentItem)
         }
     }
 
@@ -55,35 +58,20 @@ class ImageActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun shareImage(imageUri: Uri) {
-        val file = File(imageUri.path!!)
-        val fileUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/*"
-            putExtra(Intent.EXTRA_STREAM, fileUri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    private fun showDeleteConfirmationDialog(position: Int) {
+        val dialog = DeleteConfirmationDialogFragment("1") {
+            deleteImage(position)
         }
-
-        startActivity(Intent.createChooser(shareIntent, "Share Image"))
-    }
-
-    private fun confirmDeleteImage(position: Int) {
-        File(Uri.parse(imageUris[position]).path!!)
-        AlertDialog.Builder(this)
-            .setTitle("Confirm Delete")
-            .setMessage("Are you sure you want to delete this image?")
-            .setPositiveButton("Delete") { _, _ -> deleteImage(position) }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .show()
+        dialog.show(
+            (this as AppCompatActivity).supportFragmentManager,
+            "DeleteConfirmationDialog"
+        )
     }
 
     private fun deleteImage(position: Int) {
         val file = File(Uri.parse(imageUris[position]).path!!)
         if (file.exists()) {
             file.delete()
-            // Remove the deleted image from the ViewPager and update the adapter
-//            imageUris = imageUris.toMutableList().apply { removeAt(position) }
             viewPager.currentItem = position-1
             imageUris.removeAt(position)
             imagePagerAdapter?.deleteItem(imageUris)

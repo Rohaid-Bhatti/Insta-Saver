@@ -20,7 +20,7 @@
     <dimen name="edit_text_radius_bg">30dp</dimen>
 
     <dimen name="language_button_text">200dp</dimen>
-    <dimen name="navigation_drawer_width">250dp</dimen>
+    <dimen name="navigation_drawer_width">300dp</dimen>
     <dimen name="nav_header_height">300dp</dimen>
     <dimen name="help_image_size">500dp</dimen>
     <dimen name="language_recycler_bottom">8dp</dimen>
