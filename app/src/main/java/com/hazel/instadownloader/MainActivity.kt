@@ -28,7 +28,8 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var navController: NavController
+    private var navController: NavController? = null
+    private var postUrl : String? = null
 //    private var permissionRequestCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         navController = navHostFragment.navController
 
         setUpAppbar()
-        binding.bottomNav.setupWithNavController(navController)
+        binding.bottomNav.setupWithNavController(navController!!)
         binding.bottomNav.itemIconTintList = null
         binding.navView.setNavigationItemSelectedListener(this)
 
@@ -69,9 +70,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val action = intent.action
         val type = intent.type
         if ("android.intent.action.SEND" == action && type != null && "text/plain" == type) {
-            val intent1 = intent.getStringExtra("android.intent.extra.TEXT")
-            Log.d("TESTING_FILES", "onCreate: $intent1")
+            postUrl = intent.getStringExtra("android.intent.extra.TEXT")
         }
+
+        val bundle = Bundle()
+        bundle.putString("POST_URL", postUrl)
+        this.navController!!.navigate(R.id.homeFragment, bundle)
     }
 
     /*private fun handlePermissionDenied() {

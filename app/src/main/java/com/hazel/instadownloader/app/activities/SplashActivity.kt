@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
+import androidx.appcompat.app.AppCompatDelegate
 import com.hazel.instadownloader.MainActivity
 import com.hazel.instadownloader.databinding.ActivitySplashBinding
 

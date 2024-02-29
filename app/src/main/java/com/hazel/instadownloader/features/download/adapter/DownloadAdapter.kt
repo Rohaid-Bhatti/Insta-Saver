@@ -3,6 +3,7 @@ package com.hazel.instadownloader.features.download.adapter
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,6 +63,7 @@ class DownloadAdapter(
 
     @SuppressLint("NotifyDataSetChanged")
     private fun toggleSelection(file: File, onAllAdded: () -> Unit) {
+
         if (selectedFiles.contains(file)) {
             selectedFiles.remove(file)
             onAllAdded()
@@ -187,7 +189,7 @@ class DownloadAdapter(
     }
 
     inner class DownloadViewHolder(itemView: View, private var files: List<File>) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener {
+        RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
         private val playIcon: ImageView = itemView.findViewById(R.id.ivPlayIcon)
         private val textViewFileName: TextView = itemView.findViewById(R.id.textViewFileName)
@@ -197,10 +199,6 @@ class DownloadAdapter(
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
 
         private lateinit var file: File
-
-        init {
-            itemView.setOnClickListener(this)
-        }
 
         @SuppressLint("SetTextI18n")
         fun bind(file: File) {
@@ -213,6 +211,7 @@ class DownloadAdapter(
             checkBox.isChecked = selectedFiles.contains(file)
 
             itemView.setOnLongClickListener {
+                if (isSelectionModeEnabled) return@setOnLongClickListener  false
                 isSelectionModeEnabled = true
                 toggleSelection(file) {
                     isAllSelected = files.size == selectedFiles.size
@@ -220,13 +219,19 @@ class DownloadAdapter(
                 true
             }
 
-            if (isSelectionModeEnabled) {
                 itemView.setOnClickListener {
-                    toggleSelection(file) {
-                       isAllSelected = files.size == selectedFiles.size
+                    if (isSelectionModeEnabled) {
+                        toggleSelection(file) {
+                            isAllSelected = files.size == selectedFiles.size
+                        }
+                    } else {
+                        if (isVideoFile(file)) {
+                            playVideo(itemView.context, adapterPosition, files)
+                        } else {
+                            showImage(itemView.context, adapterPosition, files)
+                        }
                     }
                 }
-            }
 
             if (isVideoFile(file)) {
                 playIcon.visibility = View.VISIBLE
@@ -249,14 +254,6 @@ class DownloadAdapter(
             Glide.with(itemView.context)
                 .load(file)
                 .into(imageView)
-        }
-
-        override fun onClick(v: View?) {
-            if (isVideoFile(file)) {
-                playVideo(itemView.context, adapterPosition, files)
-            } else {
-                showImage(itemView.context, adapterPosition, files)
-            }
         }
     }
 }

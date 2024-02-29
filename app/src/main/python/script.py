@@ -28,7 +28,7 @@ def download_post_from_link(shortcode):
     L.dirname_pattern = f"/storage/emulated/0/Download/InstaDownloader"
     post = instaloader.Post.from_shortcode(L.context, shortcode)
     L.download_post(post, target = "")
-
-def login_account(username, password):
-    Y = instaloader.Instaloader()
-    Y.login(username, password)
+    caption = post.caption
+    username = post.profile
+    print(f"{username} : {caption}")
+    return caption, username

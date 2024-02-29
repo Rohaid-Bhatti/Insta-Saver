@@ -15,8 +15,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
@@ -28,18 +31,28 @@ import com.hazel.instadownloader.core.extensions.formatVideoDuration
 import com.hazel.instadownloader.core.extensions.getVideoDuration
 import com.hazel.instadownloader.core.extensions.isImageFile
 import com.hazel.instadownloader.core.extensions.isVideoFile
+import com.hazel.instadownloader.core.extensions.playVideo
+import com.hazel.instadownloader.core.extensions.shareFile
+import com.hazel.instadownloader.core.extensions.shareFileToInstagram
+import com.hazel.instadownloader.core.extensions.shareOnWhatsApp
+import com.hazel.instadownloader.core.extensions.showImage
 import com.hazel.instadownloader.databinding.FragmentHomeBinding
+import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
+import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.math.log
 
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var latestDownloadedMediaFile: File? = null
-//    private var downloadedUrlViewModel: DownloadedUrlViewModel? = null
+    private var postUrl : String? = null
+    private var cleanUsername : String? = null
+    private var cleanCaption : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,16 +77,28 @@ class HomeFragment : Fragment() {
         val posts = module["post_count"]
         val linkDownloader = module["download_post_from_link"]
 
-        view.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                copyUrl()
-                /*if (binding.etUrl.text?.isEmpty() == false) {
-                    downloadFun(linkDownloader, posts, downloader)
-                }*/
-            }
-        })
+        arguments?.let {
+            postUrl = it.getString("POST_URL")
+        }
+
+        if (postUrl?.isEmpty() == true) {
+            view.viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    copyUrl()
+                    /*if (binding.etUrl.text?.isEmpty() == false) {
+                        downloadFun(linkDownloader, posts, downloader)
+                    }*/
+                }
+            })
+        } else {
+            binding.etUrl.setText(postUrl)
+        }
+
+        binding.tvPaste.setOnClickListener {
+            copyUrl()
+        }
 
         binding.etUrl.onFocusChangeListener = OnFocusChangeListener { _, focused ->
             val keyboard =
@@ -88,8 +113,11 @@ class HomeFragment : Fragment() {
         }
 
         binding.tvDownload.setOnClickListener {
-//            fileName = generateFileNameFromUrl(url)
             downloadFun(linkDownloader, posts, downloader)
+        }
+
+        binding.tvViewDownloads.setOnClickListener {
+            findNavController().navigate(R.id.downloadFragment)
         }
 
     }
@@ -122,15 +150,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun downloadFun(linkDownloader: PyObject?, posts: PyObject?, downloader: PyObject?) {
-//        CoroutineScope(Dispatchers.IO).launch {
         try {
             if (binding.etUrl.text.toString() != "") {
                 Toast.makeText(requireContext(), "Download Started", Toast.LENGTH_LONG).show()
 
                 if (binding.etUrl.text.toString()
                         .startsWith("https://www.instagram.com/")
-                ) { // checks if the text is a valid instagram link
-                    // Post shortcode is a part of the Post URL, https://www.instagram.com/p/SHORTCODE/
+                ) {
                     val url = binding.etUrl.text.toString()
                     var postShortcode = ""
                     if (url.startsWith("https://www.instagram.com/p/")) {
@@ -146,7 +172,7 @@ class HomeFragment : Fragment() {
 
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
-                            linkDownloader?.call(postShortcode)
+                            val testing = linkDownloader?.call(postShortcode)
                             requireActivity().runOnUiThread {
                                 Toast.makeText(
                                     requireContext(),
@@ -159,7 +185,13 @@ class HomeFragment : Fragment() {
                                 binding.StatusText.text = "Download Status: Finished"
                             }
 
-                            Log.d("DOWNLOAD_LINK", "onCreate: $linkDownloader")
+                            Log.d("TESTING_MODE", "downloadFun: $testing")
+                            val resultString = testing?.toString()
+                            val (caption, username) = resultString!!.split("', '")
+                            cleanUsername = username.replace(")", "").replace("'", "")
+                            cleanCaption = caption.replace("(", "").replace("'", "").replace("\\n", "")
+                            Log.d("TESTING_MODE", "after cleaning username: $cleanUsername")
+                            Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
 
                         } catch (error: Throwable) {
                             activity?.runOnUiThread {
@@ -218,45 +250,84 @@ class HomeFragment : Fragment() {
         } catch (error: Throwable) {
             Log.e("DOWNLOAD_FUNCTION", "downloadFun: ", error)
         }
-        /* }*/
     }
 
     private fun displayDownloadedMedia(mediaUri: File) {
         val downloadItemView =
-            LayoutInflater.from(requireContext()).inflate(R.layout.item_download, null)
-        val imageView = downloadItemView.findViewById<ImageView>(R.id.imageView)
-//        val playIconBg = downloadItemView.findViewById<LinearLayout>(R.id.playIconBg)
-        val ivPlayIcon = downloadItemView.findViewById<ImageView>(R.id.ivPlayIcon)
-//        val textViewDuration = downloadItemView.findViewById<TextView>(R.id.textViewDuration)
-        val textViewFileName = downloadItemView.findViewById<TextView>(R.id.textViewFileName)
-        val ivMenuIcon = downloadItemView.findViewById<ImageView>(R.id.ivMenuIcon)
+            LayoutInflater.from(requireContext()).inflate(R.layout.recently_download_view, null)
+        val ivThumbnail = downloadItemView.findViewById<ImageView>(R.id.ivThumbnail)
+        val ivRecentPlayIcon = downloadItemView.findViewById<ImageView>(R.id.ivRecentPlayIcon)
+        val tvRecentName = downloadItemView.findViewById<TextView>(R.id.tvRecentName)
+        val ivRecentMenu = downloadItemView.findViewById<ImageView>(R.id.ivRecentMenu)
+        val ivRecentShare = downloadItemView.findViewById<ImageView>(R.id.ivRecentShare)
+        val isVideo = isVideoFile(mediaUri)
 
         if (isImageFile(mediaUri)) {
             binding.layoutVideo.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
-                .into(imageView)
-            imageView.visibility = View.VISIBLE
-//            playIconBg.visibility = View.GONE
-            ivPlayIcon.visibility = View.GONE
-//            textViewDuration.visibility = View.GONE
+                .into(ivThumbnail)
+            ivThumbnail.visibility = View.VISIBLE
+            ivRecentPlayIcon.visibility = View.GONE
         } else if (isVideoFile(mediaUri)) {
             binding.layoutVideo.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
-                .into(imageView)
-            imageView.visibility = View.VISIBLE
-//            playIconBg.visibility = View.VISIBLE
-            ivPlayIcon.visibility = View.VISIBLE
-//            textViewDuration.visibility = View.VISIBLE
-//            val duration = getVideoDuration(mediaUri)
-//            val formattedDuration = formatVideoDuration(duration)
-//            textViewDuration.text = formattedDuration
+                .into(ivThumbnail)
+            ivThumbnail.visibility = View.VISIBLE
+            ivRecentPlayIcon.visibility = View.VISIBLE
         } else {
             binding.layoutVideo.visibility = View.GONE
         }
 
-        textViewFileName.text = mediaUri.name
+        ivThumbnail.setOnClickListener {
+            if (isVideo) {
+                activity?.let { it1 -> playVideo(it1, 0, listOf(mediaUri)) }
+            } else {
+                activity?.let { it1 -> showImage(it1, 0, listOf(mediaUri)) }
+            }
+        }
+
+        ivRecentMenu.setOnClickListener {
+            val dialog = DownloadMenu()
+            dialog.show(parentFragmentManager, "DownloadMenu")
+
+            dialog.setOnOptionClickListener(object : DownloadMenu.OnOptionClickListener {
+                override fun onRepostInstagramClicked() {
+                    activity?.let { it1 -> shareFileToInstagram(it1, mediaUri, isVideo) }
+                }
+
+                override fun onShareClicked() {
+                    activity?.let { it1 -> shareFile(it1, mediaUri) }
+                }
+
+                override fun onShareWhatsAppClicked() {
+                    activity?.let { it1 -> shareOnWhatsApp(it1, mediaUri) }
+                }
+
+                override fun onRenameClicked() {
+                    // Handle rename click action
+                }
+
+                override fun onDeleteClicked() {
+                    val dialog = DeleteConfirmationDialogFragment("1") {
+//                        deleteFile(context, file)
+                    }
+                    activity?.let { it1 ->
+                        dialog.show(
+                            it1.supportFragmentManager,
+                            "DeleteConfirmationDialog"
+                        )
+                    }
+                }
+            })
+        }
+
+        ivRecentShare.setOnClickListener {
+            activity?.let { it1 -> shareFile(it1, mediaUri) }
+        }
+
+        tvRecentName.text = mediaUri.name
         binding.container.addView(downloadItemView)
     }
 

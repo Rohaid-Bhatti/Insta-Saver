@@ -256,7 +256,7 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     }
 
     private fun initBackPressDispatcher() {
-        requireActivity().onBackPressedDispatcher.addCallback(
+        activity?.onBackPressedDispatcher?.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
