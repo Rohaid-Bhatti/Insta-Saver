@@ -1,34 +1,30 @@
 package com.hazel.instadownloader.features.home
 
+import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.hazel.instadownloader.R
-import com.hazel.instadownloader.core.database.DownloadedUrl
-import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
-import com.hazel.instadownloader.core.extensions.formatVideoDuration
-import com.hazel.instadownloader.core.extensions.getVideoDuration
 import com.hazel.instadownloader.core.extensions.isImageFile
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.playVideo
@@ -43,16 +39,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.math.log
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var latestDownloadedMediaFile: File? = null
-    private var postUrl : String? = null
-    private var cleanUsername : String? = null
-    private var cleanCaption : String? = null
+    private var postUrl: String? = null
+    private var cleanUsername: String? = null
+    private var cleanCaption: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +60,7 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -96,6 +95,35 @@ class HomeFragment : Fragment() {
             binding.etUrl.setText(postUrl)
         }
 
+        val drawableStart = resources.getDrawable(R.drawable.url_link_icon)
+        binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableStart, null, null, null)
+
+        binding.etUrl.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val hasText = !s.isNullOrEmpty() // Check if text is not null or empty
+                val drawable = if (hasText) resources.getDrawable(R.drawable.ic_close) else null
+
+                binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableStart, null, drawable, null)
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        // Adding click listener to the close icon drawable
+        binding.etUrl.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val drawableEnd = binding.etUrl.compoundDrawablesRelative[2]
+                if (drawableEnd != null && event.rawX >= (binding.etUrl.right - drawableEnd.bounds.width())) {
+                    // Clear the text when the close icon is clicked
+                    binding.etUrl.setText("")
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
+
         binding.tvPaste.setOnClickListener {
             copyUrl()
         }
@@ -126,7 +154,6 @@ class HomeFragment : Fragment() {
         latestDownloadedMediaFile =
             getLatestDownloadedFile("/storage/emulated/0/Download/InstaDownloader")
 
-        Log.d("DOWNLOAD_MEDIA", "updateLatestDownloadedMediaFile: it is calling")
         latestDownloadedMediaFile?.let { file ->
             displayDownloadedMedia(file)
             binding.layoutVideo.visibility = View.VISIBLE
@@ -149,10 +176,12 @@ class HomeFragment : Fragment() {
         return sortedFiles.firstOrNull()
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun downloadFun(linkDownloader: PyObject?, posts: PyObject?, downloader: PyObject?) {
         try {
             if (binding.etUrl.text.toString() != "") {
                 Toast.makeText(requireContext(), "Download Started", Toast.LENGTH_LONG).show()
+                binding.layoutPB.visibility = View.VISIBLE
 
                 if (binding.etUrl.text.toString()
                         .startsWith("https://www.instagram.com/")
@@ -172,8 +201,13 @@ class HomeFragment : Fragment() {
 
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
-                            val testing = linkDownloader?.call(postShortcode)
+                            val date = Calendar.getInstance().time
+                            val formatter = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
+                            val formattedDate = formatter.format(date)
+
+                            val testing = linkDownloader?.call(postShortcode, formattedDate)
                             requireActivity().runOnUiThread {
+                                binding.layoutPB.visibility = View.GONE
                                 Toast.makeText(
                                     requireContext(),
                                     "Download Finished",
@@ -189,12 +223,14 @@ class HomeFragment : Fragment() {
                             val resultString = testing?.toString()
                             val (caption, username) = resultString!!.split("', '")
                             cleanUsername = username.replace(")", "").replace("'", "")
-                            cleanCaption = caption.replace("(", "").replace("'", "").replace("\\n", "")
+                            cleanCaption =
+                                caption.replace("(", "").replace("'", "").replace("\\n", "")
                             Log.d("TESTING_MODE", "after cleaning username: $cleanUsername")
                             Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
 
                         } catch (error: Throwable) {
                             activity?.runOnUiThread {
+                                binding.layoutPB.visibility = View.GONE
                                 Toast.makeText(
                                     requireContext(),
                                     "Something went wrong",
@@ -312,6 +348,7 @@ class HomeFragment : Fragment() {
                 override fun onDeleteClicked() {
                     val dialog = DeleteConfirmationDialogFragment("1") {
 //                        deleteFile(context, file)
+                        deleteFile(mediaUri)
                     }
                     activity?.let { it1 ->
                         dialog.show(
@@ -329,6 +366,13 @@ class HomeFragment : Fragment() {
 
         tvRecentName.text = mediaUri.name
         binding.container.addView(downloadItemView)
+    }
+
+    private fun deleteFile(file: File) {
+        if (file.exists()) {
+            binding.layoutVideo.visibility = View.GONE
+            file.delete()
+        }
     }
 
     private fun copyUrl() {

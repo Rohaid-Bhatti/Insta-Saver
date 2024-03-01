@@ -4,29 +4,29 @@
     tools:showIn = "navigation_view">
 
         <item
-            android:id="@+id/nav_language"
-            android:icon="@drawable/languages_icon"
-            android:title="@string/language_drawer"/>
-        <item
-            android:id="@+id/nav_terms"
-            android:icon="@drawable/terms_icon"
-            android:title="@string/terms_conditions_drawer"/>
-        <item
-            android:id="@+id/nav_privacy"
-            android:icon="@drawable/privacy_icon"
-            android:title="@string/privacy_policy_drawer"/>
+            android:id="@+id/nav_help"
+            android:icon="@drawable/how_to_download_icon"
+            android:title="@string/how_to_download"/>
         <item
             android:id="@+id/nav_feedback"
             android:icon="@drawable/feedback_icon"
             android:title="@string/feedback_drawer"/>
         <item
+            android:id="@+id/nav_rate"
+            android:icon="@drawable/rateus_icon"
+            android:title="@string/rate_us_drawer"/>
+        <item
             android:id="@+id/nav_share"
             android:icon="@drawable/share_icon"
             android:title="@string/share_app_drawer"/>
         <item
-            android:id="@+id/nav_rate"
-            android:icon="@drawable/rateus_icon"
-            android:title="@string/rate_us_drawer"/>
+            android:id="@+id/nav_privacy"
+            android:icon="@drawable/privacy_icon"
+            android:title="@string/privacy_policy_drawer"/>
+        <item
+            android:id="@+id/nav_terms"
+            android:icon="@drawable/terms_icon"
+            android:title="@string/terms_conditions_drawer"/>
         <item
             android:id="@+id/nav_version"
             android:icon="@drawable/app_version_icon"

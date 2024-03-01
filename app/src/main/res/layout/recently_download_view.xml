@@ -30,6 +30,16 @@
             app:layout_constraintEnd_toEndOf="@+id/ivThumbnail"
             app:layout_constraintStart_toStartOf="@id/ivThumbnail" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="-8dp"
+            android:background="@drawable/language_button_bg"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/ivProfile"/>
+
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfile"
             android:layout_width="40dp"

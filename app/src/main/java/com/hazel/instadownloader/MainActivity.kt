@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -29,7 +30,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
     private var navController: NavController? = null
-    private var postUrl : String? = null
+    private var postUrl: String? = null
 //    private var permissionRequestCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +66,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomNav.setupWithNavController(navController!!)
         binding.bottomNav.itemIconTintList = null
         binding.navView.setNavigationItemSelectedListener(this)
+
+        val headerView = binding.navView.getHeaderView(0)
+        val layoutLanguageNav = headerView.findViewById<ConstraintLayout>(R.id.layoutLanguageNav)
+
+        layoutLanguageNav.setOnClickListener {
+            val intent = Intent(this, LanguageActivity::class.java)
+            startActivity(intent)
+        }
 
         val intent = intent
         val action = intent.action
@@ -169,7 +178,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.help_icon -> {
-                showBottomSheet()
+                debounce(binding.root) {
+                    showBottomSheet()
+                }
                 return true
             }
         }
@@ -191,9 +202,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     //for navigation drawer option selection
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_language -> {
-                val intent = Intent(this, LanguageActivity::class.java)
-                startActivity(intent)
+            R.id.nav_help -> {
+                debounce(binding.root) {
+                    val bottomSheetFragment = HelpFragment()
+                    bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
+                }
                 return true
             }
 
@@ -203,6 +216,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 startActivity(intent)
                 return true
             }
+
             R.id.nav_feedback -> Toast.makeText(this, "Feedback!", Toast.LENGTH_SHORT).show()
             R.id.nav_share -> {
                 debounce(binding.root) {
@@ -213,6 +227,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             R.id.nav_rate -> Toast.makeText(this, "Rate!", Toast.LENGTH_SHORT).show()
             R.id.nav_version -> Toast.makeText(this, "Version!", Toast.LENGTH_SHORT).show()
+            R.id.layoutLanguageNav -> Toast.makeText(this, "Version!", Toast.LENGTH_SHORT).show()
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true

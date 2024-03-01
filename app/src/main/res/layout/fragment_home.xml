@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:hint="@string/et_hint_text"
         android:fontFamily="@font/sf_pro_rounded_regular"
-        android:drawableStart="@drawable/url_link_icon"
         app:layout_constraintTop_toTopOf="parent"
         android:drawablePadding="@dimen/remove_ad_margin"
         android:background="@drawable/edit_text_bg"
@@ -79,6 +78,28 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutPB"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        android:background="@drawable/item_language_bg"
+        android:backgroundTint="@color/downloadRecyclerItemColor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cvButtons">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutVideo"

@@ -40,7 +40,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/setting_upgrade_cv_bg">
+                    android:background="@drawable/ads_remover_bg">
 
                     <TextView
                         android:id="@+id/tvUpgrade"
@@ -260,7 +260,7 @@
                     android:id="@+id/ivHelp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/how_download_icon"
+                    android:src="@drawable/how_to_download_icon"
                     app:layout_constraintBottom_toBottomOf="@+id/tvHelpSubTitle"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/tvHelpTitle" />

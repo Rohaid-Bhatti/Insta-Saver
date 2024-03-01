@@ -91,4 +91,7 @@ dependencies {
     val lifecycle_version = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+
+    //for animation
+    implementation("com.airbnb.android:lottie:5.1.1")
 }

@@ -28,5 +28,12 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- for changing the color of the switch -->
+    <style name="SCBSwitch" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/titleColor</item>
+        <item name="colorSwitchThumbNormal">@color/SwitchOffColor</item>
+        <item name="android:colorForeground">#42221f1f</item>
+    </style>
+
     <style name="Theme.InstaDownloader" parent="Base.Theme.InstaDownloader" />
 </resources>

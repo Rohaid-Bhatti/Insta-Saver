@@ -19,9 +19,9 @@
     <string name="terms_conditions_drawer"><![CDATA[Terms & Conditions]]></string>
     <string name="privacy_policy_drawer">Privacy Policy</string>
     <string name="feedback_drawer">Feedback</string>
-    <string name="share_app_drawer">Share App</string>
+    <string name="share_app_drawer">Share this app</string>
     <string name="rate_us_drawer">Rate Us</string>
-    <string name="app_version_drawer">App Version 0.1</string>
+    <string name="app_version_drawer">App Version 0.0.1</string>
     <string name="remove_ads_drawer">Remove Ads</string>
     <string name="share_app_message">Check out My App on the Play Store: https://play.google.com/store/apps/details?id=</string>
 
