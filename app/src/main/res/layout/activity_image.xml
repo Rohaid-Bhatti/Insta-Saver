@@ -4,15 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".app.activities.ImageActivity">
+
+    <include
+        android:id="@+id/toolbarImage"
+        layout="@layout/my_toolbar" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal"
+        android:layout_below="@id/toolbarImage"/>
 
-    <LinearLayout
+    <!--<LinearLayout
         android:id="@+id/actionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -47,5 +53,5 @@
             android:layout_weight="1"
             android:contentDescription="Delete Image" />
 
-    </LinearLayout>
+    </LinearLayout>-->
 </RelativeLayout>

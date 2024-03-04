@@ -9,14 +9,11 @@
     <color name="bgSplashColor">#FEDBEB</color>
     <color name="adsTextColor">#8BA1BD</color>
 
-    <color name="adsStartColor">#EBB34D</color>
-    <color name="adsEndColor">#F79532</color>
     <color name="editTextBgColor">#F5F5F5</color>
 <!--    <color name="editTextBorderColor">#FDDDEC</color>-->
     <color name="helpCrossColor">#71787E</color>
     <color name="downloadRecyclerItemColor">#F3F3F3</color>
 
-    <color name="playBackgroundColor">#801D2939</color>
     <color name="ViewAllColor">#737B82</color>
     <color name="PermissionDialogColor">#F5F5F5</color>
     <color name="DownloadFragmentColor">#727B82</color>

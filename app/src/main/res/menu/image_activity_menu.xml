@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:title="@string/whatsapp_txt"
+        android:id="@+id/whatsAppIcon"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/whatsapp_icon"/>
+
+    <item android:title="@string/share_txt"
+        android:id="@+id/shareIcon"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/send_icon"/>
+
+    <item android:title="@string/repost_txt"
+        android:id="@+id/repostIcon"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/repost_icon"/>
+
+    <item android:title="@string/delete_txt"
+        android:id="@+id/deleteIcon"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/delete_icon"/>
+</menu>

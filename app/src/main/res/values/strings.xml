@@ -15,7 +15,6 @@
     <!--Navigation Drawer-->
     <string name="open_nav">Open Navigation Drawer</string>
     <string name="close_nav">Close Navigation Drawer</string>
-    <string name="language_drawer">Language</string>
     <string name="terms_conditions_drawer"><![CDATA[Terms & Conditions]]></string>
     <string name="privacy_policy_drawer">Privacy Policy</string>
     <string name="feedback_drawer">Feedback</string>

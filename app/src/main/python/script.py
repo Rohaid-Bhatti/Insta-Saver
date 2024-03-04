@@ -31,6 +31,7 @@ def download_post_from_link(shortcode,file_Name):
     L.download_post(post, target = "")
     caption = post.caption
     username = post.profile
+    post_url = post.url
              
     print(f"{username} : {caption}")
-    return caption, username
+    return caption, username, post_url

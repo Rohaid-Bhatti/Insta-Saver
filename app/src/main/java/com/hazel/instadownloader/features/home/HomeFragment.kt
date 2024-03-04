@@ -15,9 +15,9 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -43,7 +43,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 
-
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -51,6 +50,7 @@ class HomeFragment : Fragment() {
     private var postUrl: String? = null
     private var cleanUsername: String? = null
     private var cleanCaption: String? = null
+    private var cleanPostUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -206,6 +206,21 @@ class HomeFragment : Fragment() {
                             val formattedDate = formatter.format(date)
 
                             val testing = linkDownloader?.call(postShortcode, formattedDate)
+
+                            Log.d("TESTING_MODE", "downloadFun: $testing")
+                            val resultString = testing?.toString()
+                            val (caption, username, postUrl) = resultString!!.split("', '")
+                            cleanUsername = username.replace(")", "").replace("'", "")
+                            cleanCaption =
+                                caption.replace("(", "").replace("'", "").replace("\\n", "")
+                            cleanPostUrl = postUrl.replace(")", "").replace("'", "")
+
+                            Log.d("TESTING_MODE", "after cleaning username: $cleanUsername")
+                            Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
+                            Log.d("TESTING_MODE", "after cleaning Url: $cleanPostUrl")
+
+//                            binding.postThumbnail.setImageURI(cleanPostUrl?.toUri())
+
                             requireActivity().runOnUiThread {
                                 binding.layoutPB.visibility = View.GONE
                                 Toast.makeText(
@@ -218,15 +233,6 @@ class HomeFragment : Fragment() {
                                 //    downloadedUrlViewModel?.insertDownloadedUrl(downloadedUrl)
                                 binding.StatusText.text = "Download Status: Finished"
                             }
-
-                            Log.d("TESTING_MODE", "downloadFun: $testing")
-                            val resultString = testing?.toString()
-                            val (caption, username) = resultString!!.split("', '")
-                            cleanUsername = username.replace(")", "").replace("'", "")
-                            cleanCaption =
-                                caption.replace("(", "").replace("'", "").replace("\\n", "")
-                            Log.d("TESTING_MODE", "after cleaning username: $cleanUsername")
-                            Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
 
                         } catch (error: Throwable) {
                             activity?.runOnUiThread {
