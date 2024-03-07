@@ -12,5 +12,5 @@
         android:id="@+id/premium_icon"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@drawable/premium_toolbar"/>
+        app:actionLayout="@layout/layout_animation"/>
 </menu>

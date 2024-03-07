@@ -9,10 +9,12 @@ import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.navigation.NavigationView
 import com.hazel.instadownloader.app.activities.LanguageActivity
 import com.hazel.instadownloader.app.activities.SettingActivity
@@ -152,10 +154,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun setUpAppbar() = binding.appBar.apply {
         myToolbar.title = getString(R.string.app_name)
         setSupportActionBar(root)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.hamburger_icon)
-        }
 
         val toggle = ActionBarDrawerToggle(
             this@MainActivity,
@@ -166,11 +164,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
+        supportActionBar?.setHomeButtonEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.hamburger_icon)
     }
 
     //for toolbar
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.app_bar, menu)
+        val premiumItem = menu.findItem(R.id.premium_icon)
+        val actionView = premiumItem.actionView as ConstraintLayout
+        val animationView =
+            actionView.findViewById<LottieAnimationView>(R.id.premium_animation_view)
+        animationView.setOnClickListener {
+            Toast.makeText(this@MainActivity, "Premium clicked", Toast.LENGTH_SHORT).show()
+        }
         return super.onCreateOptionsMenu(menu)
     }
 

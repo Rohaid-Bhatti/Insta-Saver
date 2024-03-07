@@ -25,6 +25,10 @@ import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.hazel.instadownloader.R
+import com.hazel.instadownloader.core.database.AppDatabase
+import com.hazel.instadownloader.core.database.DownloadedItem
+import com.hazel.instadownloader.core.database.DownloadedUrlRepository
+import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
 import com.hazel.instadownloader.core.extensions.isImageFile
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.playVideo
@@ -51,6 +55,7 @@ class HomeFragment : Fragment() {
     private var cleanUsername: String? = null
     private var cleanCaption: String? = null
     private var cleanPostUrl: String? = null
+    private lateinit var viewModel: DownloadedUrlViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,7 +69,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        downloadedUrlViewModel = ViewModelProvider(this)[DownloadedUrlViewModel::class.java]
+        viewModel = DownloadedUrlViewModel(
+            DownloadedUrlRepository(
+                AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
+            )
+        )
 
         if (!Python.isStarted()) {
             activity?.let { AndroidPlatform(it) }?.let { Python.start(it) }
@@ -147,7 +156,6 @@ class HomeFragment : Fragment() {
         binding.tvViewDownloads.setOnClickListener {
             findNavController().navigate(R.id.downloadFragment)
         }
-
     }
 
     private fun updateLatestDownloadedMediaFile() {
@@ -219,7 +227,14 @@ class HomeFragment : Fragment() {
                             Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
                             Log.d("TESTING_MODE", "after cleaning Url: $cleanPostUrl")
 
-//                            binding.postThumbnail.setImageURI(cleanPostUrl?.toUri())
+                            val downloadedItem = DownloadedItem(
+                                url = binding.etUrl.text.toString(),
+                                fileName = formattedDate,
+                                postUrl = cleanPostUrl ?: "",
+                                caption = cleanCaption ?: "",
+                                username = cleanUsername ?: ""
+                            )
+                            viewModel.insertDownloadedItem(downloadedItem)
 
                             requireActivity().runOnUiThread {
                                 binding.layoutPB.visibility = View.GONE
@@ -229,8 +244,6 @@ class HomeFragment : Fragment() {
                                     Toast.LENGTH_LONG
                                 ).show()
                                 updateLatestDownloadedMediaFile()
-                                //   val downloadedUrl = DownloadedUrl(url = url, fileName = "fileName")
-                                //    downloadedUrlViewModel?.insertDownloadedUrl(downloadedUrl)
                                 binding.StatusText.text = "Download Status: Finished"
                             }
 

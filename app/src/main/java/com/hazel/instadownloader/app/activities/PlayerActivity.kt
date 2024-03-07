@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.R
 import com.hazel.instadownloader.app.adapters.VideoPagerAdapter
 import com.hazel.instadownloader.core.extensions.isVideoFile
@@ -39,7 +40,6 @@ class PlayerActivity : AppCompatActivity() {
         videoPagerAdapter = VideoPagerAdapter(videoUris, this)
         binding?.videoPager?.adapter = videoPagerAdapter
         binding?.videoPager?.setCurrentItem(position, false)
-
     }
 
     private fun showDeleteConfirmationDialog(position: Int) {

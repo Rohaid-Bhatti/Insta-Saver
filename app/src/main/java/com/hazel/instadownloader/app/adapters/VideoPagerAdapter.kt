@@ -37,7 +37,7 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
         private val btnSkipBackward: ImageButton = itemView.findViewById(R.id.btn_skip_backward)
         private val btnSkipForward: ImageButton = itemView.findViewById(R.id.btn_skip_forward)
         private val btnPlayPause: ImageButton = itemView.findViewById(R.id.btn_play_pause)
-        private val btnRotate: ImageButton = itemView.findViewById(R.id.btn_rotate)
+//        private val btnRotate: ImageButton = itemView.findViewById(R.id.btn_rotate)
         private val btnLock: ImageButton = itemView.findViewById(R.id.btn_lock)
         private val seekBar: SeekBar = itemView.findViewById(R.id.seek_bar)
         private val tvTimer: TextView = itemView.findViewById(R.id.tv_timer)
@@ -61,6 +61,10 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
                 }
             })
 
+            simpleVideoView.setOnCompletionListener {
+                btnPlayPause.setImageResource(R.drawable.ic_play)
+            }
+
             btnPlayPause.setOnClickListener {
                 if (simpleVideoView.isPlaying) {
                     simpleVideoView.pause()
@@ -71,7 +75,7 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
                 }
             }
 
-            btnRotate.setOnClickListener {
+            /*btnRotate.setOnClickListener {
                 val activity = context as Activity
                 val newOrientation = if (activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -79,7 +83,7 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                 }
                 activity.requestedOrientation = newOrientation
-            }
+            }*/
 
             btnLock.setOnClickListener {
                 val isLocked = simpleVideoView.isClickable
@@ -98,6 +102,12 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
             }
 
             simpleVideoView.setOnPreparedListener {
+                it.start()
+                if (simpleVideoView.isPlaying) {
+                    btnPlayPause.setImageResource(R.drawable.ic_pause)
+                } else {
+                    btnPlayPause.setImageResource(R.drawable.ic_play)
+                }
                 seekBar.max = simpleVideoView.duration
                 updateTimer()
                 Handler(Looper.getMainLooper()).postDelayed(timerRunnable, 1000)
@@ -124,23 +134,20 @@ class VideoPagerAdapter(private val videoUris: List<String>, private val context
             val totalMinutes = totalSeconds / 60
             val currentMinutes = currentSeconds / 60
 
-            val remainingSeconds = currentSeconds % 60
-            val remainingMinutes = currentMinutes % 60
-
             val totalTimeStr = String.format(Locale.getDefault(), "%02d:%02d", totalMinutes, totalSeconds % 60)
             val currentTimeStr = String.format(Locale.getDefault(), "%02d:%02d", currentMinutes, currentSeconds % 60)
 
-            tvTimer.text = "$currentTimeStr / $totalTimeStr"
+            tvTimer.text = currentTimeStr
             tvTimerTotal.text = totalTimeStr
         }
 
         fun bind(videoUri: String) {
 //            simpleVideoView.setMediaController(mediaController)
             simpleVideoView.setVideoURI(Uri.parse(videoUri))
-            simpleVideoView.setOnPreparedListener {
+            /*simpleVideoView.setOnPreparedListener {
                 it.start()
                 it.isLooping = false
-            }
+            }*/
         }
     }
 }

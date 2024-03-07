@@ -20,10 +20,9 @@
     <dimen name="help_image_size">500dp</dimen>
     <dimen name="language_recycler_bottom">8dp</dimen>
     <dimen name="language_button_padding">72dp</dimen>
-    <dimen name="language_recycler_bottom_padding">75dp</dimen>
     <dimen name="image_size">40dp</dimen>
     <dimen name="padding_text_small">2dp</dimen>
 
     <dimen name="download_image_size">100dp</dimen>
-    <dimen name="profile_circular_image_size">35dp</dimen>
+    <dimen name="profile_circular_image_size">30dp</dimen>
 </resources>

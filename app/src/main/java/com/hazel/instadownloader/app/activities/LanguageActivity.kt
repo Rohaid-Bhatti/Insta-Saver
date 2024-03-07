@@ -8,9 +8,11 @@ import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.airbnb.lottie.LottieAnimationView
 import com.hazel.instadownloader.R
 import com.hazel.instadownloader.app.adapters.LanguageAdapter
 import com.hazel.instadownloader.app.utils.DataStores
@@ -53,7 +55,7 @@ class LanguageActivity : AppCompatActivity() {
         binding.recyclerViewLanguages.adapter = languageAdapter
 //        binding.recyclerViewLanguages.addItemDecoration(TopSpaceItemDecoration())
 
-        CoroutineScope(Dispatchers.IO).launch {
+        /*CoroutineScope(Dispatchers.IO).launch {
             val isButtonShown = DataStores.isSaveButtonShown(this@LanguageActivity).first()
             withContext(Dispatchers.Main) {
                 if (!isButtonShown) {
@@ -61,15 +63,15 @@ class LanguageActivity : AppCompatActivity() {
                     binding.transparentSpace.visibility = View.GONE
                 }
             }
-        }
+        }*/
 
         // just for the testing purpose i am dismissing the activity
-        binding.btnSave.setOnClickListener {
+        /*binding.btnSave.setOnClickListener {
             saveLanguage()
         }
 
 //        val get = Locale.getDefault().language
-        /*binding.tvNext.setOnClickListener {
+        binding.tvNext.setOnClickListener {
             if (get != selected) {
                 if (selected.isNotEmpty()) {
                     changeLanguage(selected)
@@ -108,21 +110,32 @@ class LanguageActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = menuInflater
         // Check if the save button has been shown before
-        CoroutineScope(Dispatchers.IO).launch {
-            val isSaveButtonShown = DataStores.isSaveButtonShown(this@LanguageActivity).first()
-            withContext(Dispatchers.Main) {
-                if (!isSaveButtonShown) {
-                    inflater.inflate(R.menu.menu_language_activity, menu)
-                    val saveItem = menu?.findItem(R.id.action_save)
-                    saveItem?.setActionView(R.layout.toolbar_save_button)
-                    val saveButton = saveItem?.actionView?.findViewById<Button>(R.id.btn_save)
-                    saveButton?.setOnClickListener {
-                        saveLanguage()
-                    }
-                    DataStores.storeSaveButtonShown(this@LanguageActivity, true)
-                }
-            }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val isSaveButtonShown = DataStores.isSaveButtonShown(this@LanguageActivity).first()
+//            withContext(Dispatchers.Main) {
+//                if (!isSaveButtonShown) {
+        inflater.inflate(R.menu.menu_language_activity, menu)
+
+        val saveBtn = menu?.findItem(R.id.action_save)
+        val actionView = saveBtn?.actionView as ConstraintLayout
+        val actionSave =
+            actionView.findViewById<LottieAnimationView>(R.id.save_animation_view)
+        actionSave.setOnClickListener {
+            Toast.makeText(this, "Save button clicked", Toast.LENGTH_SHORT).show()
+            finish()
         }
+
+
+//                    val saveItem = menu?.findItem(R.id.action_save)
+//                    saveItem?.setActionView(R.layout.toolbar_save_button)
+//                    val saveButton = saveItem?.actionView?.findViewById<Button>(R.id.btn_save)
+//                    saveButton?.setOnClickListener {
+//                        saveLanguage()
+//                    }
+//                    DataStores.storeSaveButtonShown(this@LanguageActivity, true)
+//                }
+//            }
+//        }
         return true
     }
 

@@ -5,5 +5,6 @@
     <item
         android:id="@+id/action_save"
         android:title="@string/save_btn"
-        app:showAsAction="always" />
+        app:showAsAction="always"
+        app:actionLayout="@layout/layout_lan_button_animation"/>
 </menu>

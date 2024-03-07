@@ -14,8 +14,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/closeIcon"
-            android:layout_width="@dimen/edit_text_padding_vertical"
-            android:layout_height="@dimen/edit_text_padding_vertical"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:src="@drawable/ic_close"
             android:layout_margin="@dimen/padding_page_small"
             android:clickable="true"

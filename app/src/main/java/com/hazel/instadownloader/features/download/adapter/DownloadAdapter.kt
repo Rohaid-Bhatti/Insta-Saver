@@ -2,6 +2,7 @@ package com.hazel.instadownloader.features.download.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,6 +26,7 @@ import com.hazel.instadownloader.core.extensions.shareOnWhatsApp
 import com.hazel.instadownloader.core.extensions.showImage
 import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
 import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
+import com.hazel.instadownloader.features.dialogBox.RenameDialogFragment
 import java.io.File
 
 class DownloadAdapter(
@@ -159,7 +161,7 @@ class DownloadAdapter(
         }
     }
 
-    private fun showRenameDialog(context: Context, file: File, position: Int) {
+    /*private fun showRenameDialog(context: Context, file: File, position: Int) {
         val editText = EditText(context)
         editText.setText(file.name)
         editText.setSelection(file.name.lastIndexOf('.'))
@@ -176,6 +178,21 @@ class DownloadAdapter(
                 dialog.dismiss()
             }
             .show()
+    }*/
+
+    private fun showRenameDialog(context: Context, file: File, position: Int) {
+        val renameDialogFragment = RenameDialogFragment().apply {
+            arguments = Bundle().apply {
+                putString("fileName", file.name)
+                putInt("position", position)
+            }
+            setRenameListener(object : RenameDialogFragment.RenameListener {
+                override fun onRenameConfirmed(newName: String) {
+                    renameFile(context, file, newName, position)
+                }
+            })
+        }
+        renameDialogFragment.show((context as AppCompatActivity).supportFragmentManager, "RenameDialog")
     }
 
     private fun renameFile(context: Context, file: File, newName: String, position: Int) {

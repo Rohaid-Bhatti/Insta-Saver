@@ -7,11 +7,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class DownloadedUrlViewModel(private val repository: DownloadedUrlRepository) : ViewModel() {
-    val allDownloadedUrls: LiveData<List<DownloadedUrl>> = repository.allDownloadedUrls.asLiveData()
+    val allDownloadedItems: LiveData<List<DownloadedItem>> = repository.allDownloadedItems.asLiveData()
 
-    fun insertDownloadedUrl(downloadedUrl: DownloadedUrl) {
+    fun insertDownloadedItem(item: DownloadedItem) {
         viewModelScope.launch {
-            repository.insertDownloadedUrl(downloadedUrl)
+            repository.insertDownloadedItem(item)
         }
     }
 }

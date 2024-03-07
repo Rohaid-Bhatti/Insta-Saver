@@ -3,13 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <VideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -34,6 +35,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:thumbTint="@color/titleColor"
+            android:progressBackgroundTint="@color/white"
+            android:progressTint="@color/titleColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tv_timer_total"
             app:layout_constraintHorizontal_bias="1.0"
@@ -57,7 +60,8 @@
         android:id="@+id/layoutControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
+        android:background="@drawable/language_button_bg"
+        android:paddingHorizontal="32dp"
         android:layout_alignParentBottom="true">
 
         <ImageButton
