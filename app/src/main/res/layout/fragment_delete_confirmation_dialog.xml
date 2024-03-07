@@ -1,95 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="@dimen/edit_text_padding_horizontal"
-    android:layout_gravity="center"
-    tools:context=".features.dialogBox.DeleteConfirmationDialogFragment">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_gravity="center"
+        app:cardCornerRadius="@dimen/edit_text_padding_horizontal"
+        tools:context=".features.dialogBox.DeleteConfirmationDialogFragment">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/closeIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_close"
-            android:layout_margin="@dimen/padding_page_small"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/ivDialogIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/delete_dialog_box"
-            android:layout_marginTop="@dimen/padding_page"
-            android:layout_marginHorizontal="@dimen/padding_page_large"
-            app:layout_constraintTop_toBottomOf="@+id/closeIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/closeIcon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_margin="@dimen/padding_page_small"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/ic_close"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvDialogTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/delete_dialog_box"
-            app:layout_constraintTop_toBottomOf="@+id/ivDialogIcon"
-            android:layout_marginTop="@dimen/remove_ad_margin"
-            android:layout_marginHorizontal="@dimen/padding_page_large"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:textColor="@color/titleColor"
-            android:textSize="@dimen/remove_ad_text"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <ImageView
+                android:id="@+id/ivDialogIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/padding_page_large"
+                android:layout_marginTop="@dimen/padding_page"
+                android:src="@drawable/delete_dialog_box"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/closeIcon" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvDialogContent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/desc_delete_dialogbox"
-            android:layout_marginStart="@dimen/edit_text_radius_bg"
-            app:layout_constraintTop_toBottomOf="@+id/tvDialogTitle"
-            android:fontFamily="@font/sf_pro_rounded_medium"
-            android:textColor="@color/ViewAllColor"
-            android:gravity="center_horizontal"
-            android:textSize="@dimen/remove_ad_text"
-            app:layout_constraintStart_toStartOf="parent"/>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvDialogTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/padding_page_large"
+                android:layout_marginTop="@dimen/remove_ad_margin"
+                android:fontFamily="@font/sf_pro_rounded_bold"
+                android:text="@string/delete_dialog_box"
+                android:textColor="@color/titleColor"
+                android:textSize="@dimen/remove_ad_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivDialogIcon" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/tvFileSize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/sf_pro_rounded_medium"
-            android:gravity="center_horizontal"
-            android:layout_marginEnd="@dimen/edit_text_radius_bg"
-            android:layout_marginStart="@dimen/nav_indicator_height"
-            android:textColor="@color/subtitleColor"
-            android:textSize="@dimen/remove_ad_text"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/tvDialogContent"
-            app:layout_constraintTop_toBottomOf="@+id/tvDialogTitle" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvDialogContent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sf_pro_rounded_medium"
+                android:gravity="center_horizontal"
+                android:text="@string/desc_delete_dialogbox"
+                android:textColor="@color/ViewAllColor"
+                android:textSize="@dimen/remove_ad_text"
+                app:layout_constraintEnd_toStartOf="@+id/tvFileSize"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvDialogTitle" />
 
-        <Button
-            android:id="@+id/btnDelete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/padding_page_large"
-            android:layout_marginHorizontal="@dimen/padding_page_large"
-            android:layout_marginTop="@dimen/remove_ad_margin"
-            android:backgroundTint="@color/PermissionDialogColor"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:text="@string/delete_txt"
-            android:textColor="@color/subtitleColor"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvDialogContent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvFileSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/nav_indicator_height"
+                android:fontFamily="@font/sf_pro_rounded_medium"
+                android:gravity="center_horizontal"
+                android:textColor="@color/subtitleColor"
+                android:textSize="@dimen/remove_ad_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/tvDialogContent"
+                app:layout_constraintTop_toBottomOf="@+id/tvDialogTitle" />
 
-</androidx.cardview.widget.CardView>
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/padding_page_large"
+                android:layout_marginTop="@dimen/remove_ad_margin"
+                android:layout_marginBottom="@dimen/padding_page_large"
+                android:backgroundTint="@color/PermissionDialogColor"
+                android:fontFamily="@font/sf_pro_rounded_bold"
+                android:text="@string/delete_txt"
+                android:textColor="@color/subtitleColor"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvDialogContent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

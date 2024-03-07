@@ -161,25 +161,6 @@ class DownloadAdapter(
         }
     }
 
-    /*private fun showRenameDialog(context: Context, file: File, position: Int) {
-        val editText = EditText(context)
-        editText.setText(file.name)
-        editText.setSelection(file.name.lastIndexOf('.'))
-
-        AlertDialog.Builder(context)
-            .setTitle("Rename File")
-            .setView(editText)
-            .setPositiveButton("Rename") { dialog, _ ->
-                val newName = editText.text.toString()
-                renameFile(context, file, newName, position)
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }*/
-
     private fun showRenameDialog(context: Context, file: File, position: Int) {
         val renameDialogFragment = RenameDialogFragment().apply {
             arguments = Bundle().apply {

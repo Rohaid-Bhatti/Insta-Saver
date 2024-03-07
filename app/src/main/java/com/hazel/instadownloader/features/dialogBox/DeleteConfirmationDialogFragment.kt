@@ -24,8 +24,8 @@ class DeleteConfirmationDialogFragment(private val fileSize: String, private val
         val view = inflater.inflate(R.layout.fragment_delete_confirmation_dialog, container, false)
 
         if (dialog != null && dialog!!.window != null) {
-            dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT));
-            dialog!!.window!!.requestFeature(Window.FEATURE_NO_TITLE);
+            dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog!!.window!!.requestFeature(Window.FEATURE_NO_TITLE)
         }
 
         return view
@@ -33,6 +33,11 @@ class DeleteConfirmationDialogFragment(private val fileSize: String, private val
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        dialog!!.window!!.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
 
         val closeIcon = view.findViewById<ImageView>(R.id.closeIcon)
         closeIcon.setOnClickListener {
