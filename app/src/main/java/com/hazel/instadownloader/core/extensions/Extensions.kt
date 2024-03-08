@@ -1,8 +1,11 @@
 package com.hazel.instadownloader.core.extensions
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.view.View
@@ -10,6 +13,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.hazel.instadownloader.R
@@ -145,4 +149,24 @@ fun showImage(context: Context, position: Int , files: List<File>) {
     intent.putStringArrayListExtra("imageUris", ArrayList(imageUris))
     intent.putExtra("position", clickedImageIndex)
     context.startActivity(intent)
+}
+
+fun String.openInstagramPostInApp(context: Context) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(this)).apply {
+        setPackage("com.instagram.android")
+    }
+
+    if (isIntentAvailable(context, intent)) {
+        startActivity(context, intent, null)
+    } else {
+        val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(this))
+        startActivity(context, fallbackIntent, null)
+    }
+}
+
+@SuppressLint("QueryPermissionsNeeded")
+private fun isIntentAvailable(context: Context, intent: Intent): Boolean {
+    val packageManager = context.packageManager
+    val activities = packageManager?.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+    return activities?.isNotEmpty() ?: false
 }

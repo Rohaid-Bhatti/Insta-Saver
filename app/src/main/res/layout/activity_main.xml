@@ -44,6 +44,7 @@
             app:itemActiveIndicatorStyle="@style/App.Custom.Indicator"
             app:itemTextAppearanceActive="@style/CustomTabTextStyle"
             app:itemTextAppearanceInactive="@style/CustomTabTextStyle"
+            app:itemIconSize="28dp"
             app:itemBackground="@drawable/nav_bar_indicator"
             android:outlineSpotShadowColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"

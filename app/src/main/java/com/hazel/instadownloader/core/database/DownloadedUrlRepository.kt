@@ -13,8 +13,4 @@ class DownloadedUrlRepository(
     suspend fun insertDownloadedItem(item: DownloadedItem) {
         downloadedUrlDao.insertDownloadedItem(item)
     }
-
-    fun getDownloadedItemByFileName(fileName: String): LiveData<List<DownloadedItem>> {
-        return downloadedUrlDao.getDownloadedItemByFileName(fileName)
-    }
 }

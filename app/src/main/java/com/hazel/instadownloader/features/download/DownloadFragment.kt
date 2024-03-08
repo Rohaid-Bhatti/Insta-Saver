@@ -29,8 +29,10 @@ import com.hazel.instadownloader.databinding.FragmentDownloadBinding
 import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import com.hazel.instadownloader.features.dialogBox.PermissionCheckDialogFragment
 import com.hazel.instadownloader.features.download.adapter.DownloadAdapter
+import com.hazel.instadownloader.features.download.model.MergeDownloadItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -38,7 +40,6 @@ import kotlin.math.log
 
 class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     private val downloadedUrlViewModel: DownloadedUrlViewModel by viewModels()
-
     //    private val viewModel: DownloadViewModel by activityViewModels()
     private lateinit var downloadAdapter: DownloadAdapter
     private var _binding: FragmentDownloadBinding? = null
@@ -93,27 +94,22 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
         binding.checkBoxSelectAll.visibility = View.GONE
         binding.textViewSelectedCount.visibility = View.GONE
 
-//        val dao = AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
-//        val repo = DownloadedUrlRepository(dao)
-
-
-        /*viewModel*/downloadedUrlViewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
-            updateUI(files)
-        }
+//        /*viewModel*/downloadedUrlViewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
+//            updateUI(files)
+//        }
 
         downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
             val files = downloadedItems.map { File(it.caption) }
             Log.d("TESTING_FILES", "onViewCreated: $files")
-//            downloadedUrlViewModel.loadFilesFromStorage(downloadedItems)
         }
 
         lifecycleScope.launch {
             permissionRequestCount = DataStores.getPermissionRequestCount(requireContext()).first()
 
-            if (!checkPermission(requireContext())) {
+            if (!activity?.let { checkPermission(it) }!!) {
                 handlePermissionDenied()
             } else {
-                loadFiles()
+                delayBeforeLoadingFiles()
             }
         }
 
@@ -171,16 +167,48 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
         }
     }
 
+//    private fun loadFiles() {
+//        /*viewModel*/downloadedUrlViewModel.loadFiles()
+//    }
+
     private fun loadFiles() {
-        /*viewModel*/downloadedUrlViewModel.loadFiles()
+        downloadedUrlViewModel.loadFiles()
+
+        downloadedUrlViewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
+            downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
+                val mergeItems = mutableListOf<MergeDownloadItem>()
+
+                files.forEach { file ->
+                    val filenameWithoutExt = file.name.split(".")[0]
+
+                    val downloadedItem = downloadedItems.find { it.fileName == filenameWithoutExt }
+                    val username = downloadedItem?.username ?: ""
+                    val caption = downloadedItem?.caption ?: ""
+                    val url = downloadedItem?.url ?: ""
+                    val postUrl = downloadedItem?.postUrl ?: ""
+
+                    val mergeItem = MergeDownloadItem(file, username, caption, url, postUrl)
+                    mergeItems.add(mergeItem)
+                }
+
+                updateUI(mergeItems)
+            }
+        }
     }
 
-    private fun updateUI(files: List<File>) {
-        binding.progressBar.visibility = View.GONE
-        val arrayList = ArrayList(files)
+    private fun delayBeforeLoadingFiles() {
+        lifecycleScope.launch {
+            delay(1000)
+            loadFiles()
+        }
+    }
 
-        if (files.isNotEmpty()) {
-            downloadAdapter = DownloadAdapter(arrayList) { isDel ->
+    private fun updateUI(mergeItems: List<MergeDownloadItem>) {
+        binding.progressBar.visibility = View.GONE
+//        val arrayList = ArrayList(files)
+
+        if (mergeItems.isNotEmpty()) {
+            downloadAdapter = DownloadAdapter(mergeItems) { isDel ->
                 if (isDel) {
                     loadFiles()
                 }
@@ -199,24 +227,24 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
             binding.ivDownloadBox.visibility = View.GONE
             binding.materialTextView.visibility = View.GONE
 
-            Log.d("TESTING_FILES", "updateUI: before the for loop")
-            for (file in files) {
-                Log.d("TESTING_FILES", "updateUI: in the for loop")
-                Log.d("TESTING_FILES", "updateUI: ${file.name}")
-                val filename = file.name.split(".")[0]
-                downloadedUrlViewModel.getDownloadedItemByFileName(filename)
-                    .observe(requireActivity()) { downloadedItems ->
-                        for (i in downloadedItems.indices){
-                            Log.d("TESTING_FILES", "updateUI: $downloadedItems")
-                            Log.d("TESTING_FILES", "updateUI: ${downloadedItems[i].caption}")
-                            downloadAdapter.setUsernameAndCaption(
-                                downloadedItems[i].username,
-                                downloadedItems[i].caption
-                            )
-                            downloadAdapter.notifyItemChanged(i)
-                        }
-                    }
-            }
+//            Log.d("TESTING_FILES", "updateUI: before the for loop")
+//            for (file in files) {
+//                Log.d("TESTING_FILES", "updateUI: in the for loop")
+//                Log.d("TESTING_FILES", "updateUI: ${file.name}")
+//                val filename = file.name.split(".")[0]
+//                downloadedUrlViewModel.getDownloadedItemByFileName(filename)
+//                    .observe(requireActivity()) { downloadedItems ->
+//                        for (i in downloadedItems.indices){
+//                            Log.d("TESTING_FILES", "updateUI: $downloadedItems")
+//                            Log.d("TESTING_FILES", "updateUI: ${downloadedItems[i].caption}")
+//                            downloadAdapter.setUsernameAndCaption(
+//                                downloadedItems[i].username,
+//                                downloadedItems[i].caption
+//                            )
+//                            downloadAdapter.notifyItemChanged(i)
+//                        }
+//                    }
+//            }
         } else {
             if (!checkPermission(requireContext())) {
                 binding.ivDownloadBox.visibility = View.VISIBLE

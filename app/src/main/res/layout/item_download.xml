@@ -71,7 +71,7 @@
             android:id="@+id/ivProfile"
             android:layout_width="@dimen/profile_circular_image_size"
             android:layout_height="@dimen/profile_circular_image_size"
-            android:src="@drawable/purtgal"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toTopOf="@+id/textViewCaption"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toTopOf="parent"

@@ -28,10 +28,6 @@ class DownloadedUrlViewModel : ViewModel() {
         }
     }
 
-     fun getDownloadedItemByFileName(filename: String): LiveData<List<DownloadedItem>> {
-           return repository!!.getDownloadedItemByFileName(filename)
-     }
-
     fun loadFiles() {
         val files = loadFilesInBackground()
         filesLiveData.postValue(files)

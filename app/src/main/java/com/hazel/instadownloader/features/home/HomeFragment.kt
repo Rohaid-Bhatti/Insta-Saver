@@ -70,6 +70,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        activity?.let { viewModel.init(it) }
         /*viewModel = DownloadedUrlViewModel(
             DownloadedUrlRepository(
                 AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
@@ -376,6 +377,10 @@ class HomeFragment : Fragment() {
                             "DeleteConfirmationDialog"
                         )
                     }
+                }
+
+                override fun onPostOpenInstagram() {
+                    TODO("Not yet implemented")
                 }
             })
         }
