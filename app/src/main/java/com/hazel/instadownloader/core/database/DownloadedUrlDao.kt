@@ -1,5 +1,6 @@
 package com.hazel.instadownloader.core.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,4 +14,7 @@ interface DownloadedUrlDao {
 
     @Query("SELECT * FROM downloaded_urls")
     fun getAllDownloadedItems(): Flow<List<DownloadedItem>>
+
+    @Query("SELECT * FROM downloaded_urls WHERE fileName = :fileName")
+     fun getDownloadedItemByFileName(fileName: String): LiveData<List<DownloadedItem>>
 }

@@ -13,12 +13,18 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager.checkPermission
+import com.hazel.instadownloader.core.database.AppDatabase
+import com.hazel.instadownloader.core.database.DownloadedUrlRepository
+import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
 import com.hazel.instadownloader.databinding.FragmentDownloadBinding
 import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import com.hazel.instadownloader.features.dialogBox.PermissionCheckDialogFragment
@@ -31,7 +37,9 @@ import java.io.File
 import kotlin.math.log
 
 class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
-    private lateinit var viewModel: DownloadViewModel
+    private val downloadedUrlViewModel: DownloadedUrlViewModel by viewModels()
+
+    //    private val viewModel: DownloadViewModel by activityViewModels()
     private lateinit var downloadAdapter: DownloadAdapter
     private var _binding: FragmentDownloadBinding? = null
     private val binding get() = _binding!!
@@ -76,7 +84,7 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[DownloadViewModel::class.java]
+        activity?.let { downloadedUrlViewModel.init(it) }
 
         binding.progressBar.visibility = View.VISIBLE
         binding.ivDownloadBox.visibility = View.GONE
@@ -85,8 +93,18 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
         binding.checkBoxSelectAll.visibility = View.GONE
         binding.textViewSelectedCount.visibility = View.GONE
 
-        viewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
+//        val dao = AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
+//        val repo = DownloadedUrlRepository(dao)
+
+
+        /*viewModel*/downloadedUrlViewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
             updateUI(files)
+        }
+
+        downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
+            val files = downloadedItems.map { File(it.caption) }
+            Log.d("TESTING_FILES", "onViewCreated: $files")
+//            downloadedUrlViewModel.loadFilesFromStorage(downloadedItems)
         }
 
         lifecycleScope.launch {
@@ -119,9 +137,10 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     }
 
     private fun showDeleteDialog() {
-        val dialog = DeleteConfirmationDialogFragment(downloadAdapter.selectedFiles.size.toString()) {
-            downloadAdapter.deleteSelectedFiles()
-        }
+        val dialog =
+            DeleteConfirmationDialogFragment(downloadAdapter.selectedFiles.size.toString()) {
+                downloadAdapter.deleteSelectedFiles()
+            }
         dialog.show(
             (context as AppCompatActivity).supportFragmentManager,
             "DeleteConfirmationDialog"
@@ -153,7 +172,7 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
     }
 
     private fun loadFiles() {
-        viewModel.loadFiles()
+        /*viewModel*/downloadedUrlViewModel.loadFiles()
     }
 
     private fun updateUI(files: List<File>) {
@@ -179,6 +198,25 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
 
             binding.ivDownloadBox.visibility = View.GONE
             binding.materialTextView.visibility = View.GONE
+
+            Log.d("TESTING_FILES", "updateUI: before the for loop")
+            for (file in files) {
+                Log.d("TESTING_FILES", "updateUI: in the for loop")
+                Log.d("TESTING_FILES", "updateUI: ${file.name}")
+                val filename = file.name.split(".")[0]
+                downloadedUrlViewModel.getDownloadedItemByFileName(filename)
+                    .observe(requireActivity()) { downloadedItems ->
+                        for (i in downloadedItems.indices){
+                            Log.d("TESTING_FILES", "updateUI: $downloadedItems")
+                            Log.d("TESTING_FILES", "updateUI: ${downloadedItems[i].caption}")
+                            downloadAdapter.setUsernameAndCaption(
+                                downloadedItems[i].username,
+                                downloadedItems[i].caption
+                            )
+                            downloadAdapter.notifyItemChanged(i)
+                        }
+                    }
+            }
         } else {
             if (!checkPermission(requireContext())) {
                 binding.ivDownloadBox.visibility = View.VISIBLE
@@ -264,7 +302,10 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener {
                         downloadAdapter.selectAllItems(false)
                         downloadAdapter.isSelectionModeEnabled = false
                         downloadAdapter.notifyDataSetChanged()
-                        Log.d("TESTING_FILES", "handleOnBackPressed: ${downloadAdapter.isSelectionModeEnabled}")
+                        Log.d(
+                            "TESTING_FILES",
+                            "handleOnBackPressed: ${downloadAdapter.isSelectionModeEnabled}"
+                        )
                     } else {
                         findNavController().navigateUp()
                     }

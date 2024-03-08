@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.chaquo.python.PyObject
@@ -55,7 +56,7 @@ class HomeFragment : Fragment() {
     private var cleanUsername: String? = null
     private var cleanCaption: String? = null
     private var cleanPostUrl: String? = null
-    private lateinit var viewModel: DownloadedUrlViewModel
+    private val viewModel: DownloadedUrlViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,11 +70,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = DownloadedUrlViewModel(
+        /*viewModel = DownloadedUrlViewModel(
             DownloadedUrlRepository(
                 AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
             )
-        )
+        )*/
 
         if (!Python.isStarted()) {
             activity?.let { AndroidPlatform(it) }?.let { Python.start(it) }
@@ -400,14 +401,6 @@ class HomeFragment : Fragment() {
 
         if (!textToPaste.isNullOrEmpty() && textToPaste.startsWith("https://www.instagram.com/")) {
             binding.etUrl.setText(textToPaste)
-        }
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-
-        if (binding.etUrl.text.toString().trim().isEmpty()) {
-            copyUrl()
         }
     }
 }

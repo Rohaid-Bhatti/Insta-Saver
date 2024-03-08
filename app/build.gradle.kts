@@ -19,6 +19,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        setProperty("archivesBaseName", "Insta Downloader" + "_vc_" + versionCode + "_vn_" + versionName)
+
         ndk {
             abiFilters += listOf("armeabi-v7a", "x86_64")
         }

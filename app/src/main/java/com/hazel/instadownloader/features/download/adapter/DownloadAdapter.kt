@@ -4,20 +4,18 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.hazel.instadownloader.R
+import com.hazel.instadownloader.core.database.AppDatabase
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.playVideo
 import com.hazel.instadownloader.core.extensions.shareFile
@@ -32,14 +30,15 @@ import java.io.File
 class DownloadAdapter(
     private val files: ArrayList<File>,
     private val delCallback: (isDel: Boolean) -> Unit
-) :
-    RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
+) : RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
 
     val selectedFiles = HashSet<File>()
     var isSelectionModeEnabled = false
     private var selectionModeListener: SelectionModeListener? = null
     var isAllSelected = false
-
+//
+    private var username: String = ""
+    private var caption: String = ""
     interface SelectionModeListener {
         fun onSelectionModeEnabled(enabled: Boolean)
     }
@@ -186,6 +185,11 @@ class DownloadAdapter(
         }
     }
 
+    fun setUsernameAndCaption(username: String, caption: String) {
+        this.username = username
+        this.caption = caption
+    }
+
     inner class DownloadViewHolder(itemView: View, private var files: List<File>) :
         RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
@@ -217,30 +221,30 @@ class DownloadAdapter(
                 true
             }
 
-                itemView.setOnClickListener {
-                    if (isSelectionModeEnabled) {
-                        toggleSelection(file) {
-                            isAllSelected = files.size == selectedFiles.size
-                        }
+            itemView.setOnClickListener {
+                if (isSelectionModeEnabled) {
+                    toggleSelection(file) {
+                        isAllSelected = files.size == selectedFiles.size
+                    }
+                } else {
+                    if (isVideoFile(file)) {
+                        playVideo(itemView.context, adapterPosition, files)
                     } else {
-                        if (isVideoFile(file)) {
-                            playVideo(itemView.context, adapterPosition, files)
-                        } else {
-                            showImage(itemView.context, adapterPosition, files)
-                        }
+                        showImage(itemView.context, adapterPosition, files)
                     }
                 }
+            }
 
             if (isVideoFile(file)) {
                 playIcon.visibility = View.VISIBLE
                 playIcon.contentDescription = "Play video"
-                textViewFileName.text = file.name
+                textViewFileName.text = username/*file.name*/
             } else {
                 playIcon.visibility = View.GONE
-                textViewFileName.text = file.name
+                textViewFileName.text = username/*file.name*/
             }
 
-            textViewCaption.text = "This is for the testing purpose"
+            textViewCaption.text = caption/*"This is for the testing purpose"*/
             ivInstagramIcon.setOnClickListener {
                 Toast.makeText(
                     itemView.context,
