@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.viewpager2.widget.ViewPager2
@@ -33,11 +34,34 @@ class ImageActivity : AppCompatActivity() {
         binding = ActivityImageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.toolbarImage.myToolbar.title = ""
+        /*binding.toolbarImage.myToolbar.title = ""
         setSupportActionBar(binding.toolbarImage.myToolbar)
         setSupportActionBar(binding.toolbarImage.root)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
+        }*/
+        binding.toolbarImage.ivMenuBack.setImageResource(R.drawable.ic_arrow_back)
+        binding.toolbarImage.ivMenuBack.setOnClickListener {
+            finish()
+        }
+        binding.toolbarImage.ivHelpMenu.visibility = View.GONE
+        binding.toolbarImage.ivPremiumMenu.visibility = View.GONE
+        binding.toolbarImage.ivWhatsappMenu.visibility = View.VISIBLE
+        binding.toolbarImage.ivShareMenu.visibility = View.VISIBLE
+        binding.toolbarImage.ivRepostMenu.visibility = View.VISIBLE
+        binding.toolbarImage.ivDeleteMenu.visibility = View.VISIBLE
+
+        binding.toolbarImage.ivWhatsappMenu.setOnClickListener {
+            shareOnWhatsApp(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
+        }
+        binding.toolbarImage.ivShareMenu.setOnClickListener {
+            shareFile(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
+        }
+        binding.toolbarImage.ivRepostMenu.setOnClickListener {
+            shareFileToInstagram(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()), isVideo!!)
+        }
+        binding.toolbarImage.ivDeleteMenu.setOnClickListener {
+            showDeleteConfirmationDialog(viewPager.currentItem)
         }
 
         imageUris = intent.getStringArrayListExtra("imageUris")!!
@@ -93,7 +117,7 @@ class ImageActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.image_activity_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
@@ -122,5 +146,5 @@ class ImageActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
+    }*/
 }

@@ -9,7 +9,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
+        android:layout_marginHorizontal="10dp"
         android:layout_gravity="center"
         app:cardCornerRadius="@dimen/edit_text_padding_horizontal"
         tools:context=".features.dialogBox.DeleteConfirmationDialogFragment">

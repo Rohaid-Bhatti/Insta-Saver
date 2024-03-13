@@ -1,15 +1,17 @@
 package com.hazel.instadownloader
 
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -17,12 +19,13 @@ import androidx.navigation.ui.setupWithNavController
 import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.navigation.NavigationView
 import com.hazel.instadownloader.app.activities.LanguageActivity
-import com.hazel.instadownloader.app.activities.SettingActivity
 import com.hazel.instadownloader.app.utils.DataStores
+import com.hazel.instadownloader.app.utils.PermissionManager
 import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.shareApp
 import com.hazel.instadownloader.databinding.ActivityMainBinding
 import com.hazel.instadownloader.features.bottomSheets.HelpFragment
+import com.hazel.instadownloader.features.dialogBox.PermissionCheckDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -33,7 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var binding: ActivityMainBinding
     private var navController: NavController? = null
     private var postUrl: String? = null
-//    private var permissionRequestCount = 0
+    private var permissionRequestCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +53,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         // for saving the values in to data store
-        /*CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             permissionRequestCount = DataStores.getPermissionRequestCount(this@MainActivity).first()
 
             if (!PermissionManager.checkPermission(this@MainActivity)) {
@@ -58,7 +61,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 // Anything
             }
-        }*/
+        }
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -89,12 +92,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         this.navController!!.navigate(R.id.homeFragment, bundle)
     }
 
-    /*private fun handlePermissionDenied() {
-        if (permissionRequestCount >= 2) {
-//            showCustomPermissionDeniedDialog()
+    private fun handlePermissionDenied() {
+        if (permissionRequestCount >= 1) {
+            showCustomPermissionDeniedDialog()
         } else {
             requestPermission()
         }
+    }
+
+    private fun showCustomPermissionDeniedDialog() {
+        val dialogFragment = PermissionCheckDialogFragment()
+        dialogFragment.show(
+                this.supportFragmentManager, "PermissionDeniedDialogFragment"
+            )
     }
 
     //for permissions
@@ -107,23 +117,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 ActivityCompat.requestPermissions(
                     this, arrayOf(
-                        Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.READ_MEDIA_VIDEO,
+                        android.Manifest.permission.READ_MEDIA_IMAGES,
+                        android.Manifest.permission.READ_MEDIA_VIDEO,
                     ), PERMISSION_REQUEST_CODE
                 )
             } else {
                 ActivityCompat.requestPermissions(
                     this, arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     ), PERMISSION_REQUEST_CODE
                 )
             }
         } else {
             ActivityCompat.requestPermissions(
                 this, arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 ), PERMISSION_REQUEST_CODE
             )
         }
@@ -148,51 +158,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 //     finish()
             }
         }
-    }*/
+    }
 
     //for appbar
     private fun setUpAppbar() = binding.appBar.apply {
-        myToolbar.title = getString(R.string.app_name)
-        setSupportActionBar(root)
-
-        val toggle = ActionBarDrawerToggle(
-            this@MainActivity,
-            binding.drawerLayout,
-            binding.appBar.myToolbar,
-            R.string.open_nav,
-            R.string.close_nav
-        )
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-        supportActionBar?.setHomeButtonEnabled(true)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setHomeAsUpIndicator(R.drawable.hamburger_icon)
-    }
-
-    //for toolbar
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.app_bar, menu)
-        val premiumItem = menu.findItem(R.id.premium_icon)
-        val actionView = premiumItem.actionView as ConstraintLayout
-        val animationView =
-            actionView.findViewById<LottieAnimationView>(R.id.premium_animation_view)
-        animationView.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Premium clicked", Toast.LENGTH_SHORT).show()
+        ivMenuBack.setOnClickListener {
+            binding.drawerLayout.openDrawer(Gravity.LEFT)
         }
-        return super.onCreateOptionsMenu(menu)
-    }
 
-    //for toolbar options
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.help_icon -> {
-                debounce(binding.root) {
-                    showBottomSheet()
-                }
-                return true
+        tvTitleToolbar.text = getString(R.string.app_name)
+
+        ivHelpMenu.setOnClickListener {
+            debounce(binding.root) {
+                showBottomSheet()
             }
         }
-        return super.onOptionsItemSelected(item)
+
+        ivPremiumMenu.setOnClickListener{
+            Toast.makeText(this@MainActivity, "Premium Clicked!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // for showing the help bottom sheet
@@ -219,12 +203,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
 
             R.id.nav_terms -> Toast.makeText(this, "Terms!", Toast.LENGTH_SHORT).show()
-            R.id.nav_privacy -> {
-                val intent = Intent(this, SettingActivity::class.java)
-                startActivity(intent)
-                return true
-            }
-
+            R.id.nav_privacy -> Toast.makeText(this, "Privacy!", Toast.LENGTH_SHORT).show()
             R.id.nav_feedback -> Toast.makeText(this, "Feedback!", Toast.LENGTH_SHORT).show()
             R.id.nav_share -> {
                 debounce(binding.root) {

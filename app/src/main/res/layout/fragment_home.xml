@@ -5,165 +5,205 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="@dimen/padding_page_small"
     tools:context=".features.home.HomeFragment">
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/et_url"
-        android:layout_width="0dp"
-        android:paddingHorizontal="@dimen/edit_text_padding_horizontal"
-        android:paddingVertical="@dimen/padding_page"
-        android:layout_height="wrap_content"
-        android:textColorHint="@color/ViewAllColor"
-        android:hint="@string/et_hint_text"
-        android:fontFamily="@font/sf_pro_rounded_regular"
-        app:layout_constraintTop_toTopOf="parent"
-        android:drawablePadding="@dimen/remove_ad_margin"
-        android:background="@drawable/edit_text_bg"
-        android:inputType="textFilter"
-        android:maxLength="50"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cvButtons"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/edit_text_padding_vertical"
-        app:cardCornerRadius="38dp"
-        app:layout_constraintTop_toBottomOf="@+id/et_url"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:padding="@dimen/padding_page_small">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_url"
+                android:layout_width="0dp"
+                android:paddingHorizontal="@dimen/edit_text_padding_horizontal"
+                android:paddingVertical="@dimen/padding_page"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/ViewAllColor"
+                android:hint="@string/et_hint_text"
+                android:fontFamily="@font/sf_pro_rounded_regular"
+                app:layout_constraintTop_toTopOf="parent"
+                android:drawablePadding="@dimen/remove_ad_margin"
+                android:background="@drawable/edit_text_bg"
+                android:inputType="textFilter"
+                android:maxLength="50"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edit_text_padding_vertical"
+                app:cardCornerRadius="38dp"
+                app:layout_constraintTop_toBottomOf="@+id/et_url"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tvPaste"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sf_pro_rounded_bold"
+                        android:text="@string/paste_link"
+                        android:paddingVertical="@dimen/padding_page"
+                        android:gravity="center"
+                        android:background="@color/subtitleColor"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/remove_ad_text"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guideline2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintGuide_percent="0.5"
+                        android:orientation="vertical" />
+
+                    <TextView
+                        android:id="@+id/tvDownload"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sf_pro_rounded_bold"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/padding_page"
+                        android:text="@string/download_bn"
+                        android:textSize="@dimen/remove_ad_text"
+                        android:background="@color/titleColor"
+                        android:textColor="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/guideline2"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutVideo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edit_text_padding_vertical"
+                app:layout_constraintTop_toBottomOf="@+id/cvButtons"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <View
+                    android:id="@+id/viewLayoutBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:background="@drawable/item_language_bg"
+                    app:layout_constraintTop_toBottomOf="@+id/tvRecentDownloads"
+                    android:backgroundTint="@color/downloadRecyclerItemColor"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/padding_page"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/animationView"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true"
+                    android:visibility="gone"
+                    app:lottie_rawRes="@raw/loader"
+                    app:layout_constraintTop_toTopOf="@id/viewLayoutBg"
+                    app:layout_constraintBottom_toBottomOf="@id/viewLayoutBg"
+                    app:layout_constraintStart_toStartOf="@id/viewLayoutBg"
+                    app:layout_constraintEnd_toEndOf="@id/viewLayoutBg" />
+
+                <TextView
+                    android:id="@+id/tvRecentDownloads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/recent_downloaded"
+                    android:fontFamily="@font/sf_pro_rounded_bold"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    android:textColor="@color/subtitleColor"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tvViewDownloads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_all"
+                    android:fontFamily="@font/sf_pro_rounded_medium"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    android:textColor="@color/ViewAllColor"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:drawableEndCompat="@drawable/view_all_icon" />
+
+                <FrameLayout
+                    android:id="@+id/container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_page"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@+id/tvRecentDownloads"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutRecentSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginVertical="@dimen/padding_page"
+                app:layout_constraintTop_toBottomOf="@+id/layoutVideo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/tvRecentSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/recently_search"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/sf_pro_rounded_bold"
+                    android:textColor="@color/ViewAllColor"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvRecentSearchItem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_page"
+                    app:layout_constraintTop_toBottomOf="@+id/tvRecentSearch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:id="@+id/tvPaste"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:text="@string/paste_link"
-                android:paddingVertical="@dimen/padding_page"
-                android:gravity="center"
-                android:background="@color/subtitleColor"
-                android:textColor="@color/white"
-                android:textSize="@dimen/remove_ad_text"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/guideline2"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline2"
+                android:id="@+id/StatusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintGuide_percent="0.5"
-                android:orientation="vertical" />
-
-            <TextView
-                android:id="@+id/tvDownload"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/sf_pro_rounded_bold"
-                android:gravity="center"
-                android:paddingVertical="@dimen/padding_page"
-                android:text="@string/download_bn"
-                android:textSize="@dimen/remove_ad_text"
-                android:background="@color/titleColor"
-                android:textColor="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:text=""
+                android:layout_marginTop="@dimen/edit_text_padding_horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline2"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cvButtons" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutPB"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="16dp"
-        android:visibility="gone"
-        android:background="@drawable/item_language_bg"
-        android:backgroundTint="@color/downloadRecyclerItemColor"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cvButtons">
-
-        <!--<ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/postThumbnail"
-            app:layout_constraintBottom_toBottomOf="@id/postThumbnail"
-            app:layout_constraintStart_toStartOf="@id/postThumbnail"
-            app:layout_constraintEnd_toEndOf="@id/postThumbnail"/>-->
-
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/animationView"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/loader"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutVideo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/edit_text_padding_vertical"
-        app:layout_constraintTop_toBottomOf="@+id/cvButtons"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/tvRecentDownloads"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/recent_downloaded"
-            android:fontFamily="@font/sf_pro_rounded_bold"
-            android:textSize="16sp"
-            android:textColor="@color/subtitleColor"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <TextView
-            android:id="@+id/tvViewDownloads"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/view_all"
-            android:fontFamily="@font/sf_pro_rounded_medium"
-            android:textSize="14sp"
-            android:textColor="@color/ViewAllColor"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:drawableEndCompat="@drawable/view_all_icon" />
-
-        <FrameLayout
-            android:id="@+id/container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_page"
-            app:layout_constraintTop_toBottomOf="@+id/tvRecentDownloads"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <TextView
-        android:id="@+id/StatusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:layout_marginTop="@dimen/edit_text_padding_horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cvButtons" />
+    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -37,12 +37,24 @@ class LanguageActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Set up the Toolbar
-        setSupportActionBar(binding.appBar.myToolbar)
+        /*setSupportActionBar(binding.appBar.myToolbar)
         setSupportActionBar(binding.appBar.root)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
         }
-        binding.appBar.myToolbar.title = getString(R.string.language_title)
+        binding.appBar.myToolbar.title = getString(R.string.language_title)*/
+        binding.appBar.tvTitleToolbar.text = getString(R.string.language_title)
+        binding.appBar.ivMenuBack.setImageResource(R.drawable.ic_arrow_back)
+        binding.appBar.ivMenuBack.setOnClickListener {
+            finish()
+        }
+        binding.appBar.ivHelpMenu.visibility = View.GONE
+        binding.appBar.ivPremiumMenu.visibility = View.GONE
+        binding.appBar.animationSaveLang.visibility = View.VISIBLE
+
+        binding.appBar.animationSaveLang.setOnClickListener {
+            finish()
+        }
 
         languageAdapter =
             LanguageAdapter(langList(), this, currentLang()) { s: String, s2: String ->
@@ -107,50 +119,30 @@ class LanguageActivity : AppCompatActivity() {
 
     }*/
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = menuInflater
-        // Check if the save button has been shown before
-//        CoroutineScope(Dispatchers.IO).launch {
-//            val isSaveButtonShown = DataStores.isSaveButtonShown(this@LanguageActivity).first()
-//            withContext(Dispatchers.Main) {
-//                if (!isSaveButtonShown) {
-        inflater.inflate(R.menu.menu_language_activity, menu)
-
-        val saveBtn = menu?.findItem(R.id.action_save)
-        val actionView = saveBtn?.actionView as ConstraintLayout
-        val actionSave =
-            actionView.findViewById<LottieAnimationView>(R.id.save_animation_view)
-        actionSave.setOnClickListener {
-            Toast.makeText(this, "Save button clicked", Toast.LENGTH_SHORT).show()
-            finish()
-        }
-
-
-//                    val saveItem = menu?.findItem(R.id.action_save)
-//                    saveItem?.setActionView(R.layout.toolbar_save_button)
-//                    val saveButton = saveItem?.actionView?.findViewById<Button>(R.id.btn_save)
-//                    saveButton?.setOnClickListener {
-//                        saveLanguage()
-//                    }
-//                    DataStores.storeSaveButtonShown(this@LanguageActivity, true)
-//                }
-//            }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        val inflater = menuInflater
+//        inflater.inflate(R.menu.menu_language_activity, menu)
+//
+//        val saveBtn = menu?.findItem(R.id.action_save)
+//        val actionView = saveBtn?.actionView as ConstraintLayout
+//        val actionSave =
+//            actionView.findViewById<LottieAnimationView>(R.id.save_animation_view)
+//        actionSave.setOnClickListener {
+//            Toast.makeText(this, "Save button clicked", Toast.LENGTH_SHORT).show()
+//            finish()
 //        }
-        return true
-    }
-
-    private fun saveLanguage() {
-        finish()
-    }
+//
+//        return true
+//    }
 
     // Override onOptionsItemSelected to handle back button click
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when (item.itemId) {
+//            android.R.id.home -> {
+//                onBackPressedDispatcher.onBackPressed()
+//                return true
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
 }

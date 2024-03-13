@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.hazel.instadownloader.R
@@ -27,11 +28,40 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
-        binding?.toolbarVideo?.myToolbar?.title = ""
+        /*binding?.toolbarVideo?.myToolbar?.title = ""
         setSupportActionBar(binding?.toolbarVideo?.myToolbar)
         setSupportActionBar(binding?.toolbarVideo?.root)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
+        }*/
+
+        binding?.toolbarVideo?.ivMenuBack?.setImageResource(R.drawable.ic_arrow_back)
+        binding?.toolbarVideo?.ivMenuBack?.setOnClickListener {
+            finish()
+        }
+        binding?.toolbarVideo?.ivHelpMenu?.visibility = View.GONE
+        binding?.toolbarVideo?.ivPremiumMenu?.visibility = View.GONE
+        binding?.toolbarVideo?.ivWhatsappMenu?.visibility = View.VISIBLE
+        binding?.toolbarVideo?.ivShareMenu?.visibility = View.VISIBLE
+        binding?.toolbarVideo?.ivRepostMenu?.visibility = View.VISIBLE
+        binding?.toolbarVideo?.ivDeleteMenu?.visibility = View.VISIBLE
+
+        binding?.toolbarVideo?.ivWhatsappMenu?.setOnClickListener {
+            val currentPosition = binding!!.videoPager.currentItem
+            shareOnWhatsApp(this, File(Uri.parse(videoUris[currentPosition]).path.toString()))
+        }
+        binding?.toolbarVideo?.ivShareMenu?.setOnClickListener {
+            val currentPosition = binding!!.videoPager.currentItem
+            shareFile(this, File(Uri.parse(videoUris[currentPosition]).path.toString()))
+        }
+        binding?.toolbarVideo?.ivRepostMenu?.setOnClickListener {
+            val currentPosition = binding!!.videoPager.currentItem
+            val isVideo = isVideoFile(File(Uri.parse(videoUris[currentPosition]).path.toString()))
+            shareFileToInstagram(this, File(Uri.parse(videoUris[currentPosition]).path.toString()), isVideo)
+        }
+        binding?.toolbarVideo?.ivDeleteMenu?.setOnClickListener {
+            val currentPosition = binding!!.videoPager.currentItem
+            showDeleteConfirmationDialog(currentPosition)
         }
 
         videoUris = intent.getStringArrayListExtra("videoUri") ?: emptyList()
@@ -61,7 +91,7 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.image_activity_menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
@@ -95,5 +125,5 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
+    }*/
 }

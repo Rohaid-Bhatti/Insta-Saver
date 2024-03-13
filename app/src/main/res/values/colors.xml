@@ -4,6 +4,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="titleColor">#F4107B</color>
+    <color name="strokeProfileColor">#F6B501</color>
     <color name="SwitchOffColor">#989ca0</color>
     <color name="subtitleColor">#273344</color>
     <color name="bgSplashColor">#FEDBEB</color>

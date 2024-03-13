@@ -32,6 +32,7 @@ def download_post_from_link(shortcode,file_Name):
     caption = post.caption
     username = post.profile
     post_url = post.url
+    picture = post.owner_profile.profile_pic_url
              
-    print(f"{username} : {caption}")
-    return caption, username, post_url
+    print(f"{username} : {caption} : {picture}")
+    return caption, username, post_url, picture

@@ -1,47 +1,31 @@
 package com.hazel.instadownloader.features.download.adapter
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Bundle
-import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.hazel.instadownloader.R
-import com.hazel.instadownloader.core.database.AppDatabase
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.openInstagramPostInApp
 import com.hazel.instadownloader.core.extensions.playVideo
-import com.hazel.instadownloader.core.extensions.shareFile
-import com.hazel.instadownloader.core.extensions.shareFileToInstagram
-import com.hazel.instadownloader.core.extensions.shareOnWhatsApp
 import com.hazel.instadownloader.core.extensions.showImage
-import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
-import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
-import com.hazel.instadownloader.features.dialogBox.RenameDialogFragment
 import com.hazel.instadownloader.features.download.model.MergeDownloadItem
-import java.io.File
 
 class DownloadAdapter(
     private val mergeItems: List<MergeDownloadItem>,
-    private val delCallback: (isDel: Boolean) -> Unit
+    private var deleteFileCallback: DeleteFileCallback
 ) : RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
 
     val selectedFiles = HashSet<MergeDownloadItem>()
     var isSelectionModeEnabled = false
     private var selectionModeListener: SelectionModeListener? = null
     var isAllSelected = false
-
-//    private var username: String = ""
-//    private var caption: String = ""
 
     interface SelectionModeListener {
         fun onSelectionModeEnabled(enabled: Boolean)
@@ -62,7 +46,7 @@ class DownloadAdapter(
         holder.bind(mergeItem)
 
         holder.ivMenuIcon.setOnClickListener {
-            showBottomSheet(holder.itemView.context, mergeItem, position)
+            deleteFileCallback.onShowingMenu(mergeItem, position, selectedFiles)
         }
     }
 
@@ -105,98 +89,10 @@ class DownloadAdapter(
         selectedFiles.clear()
         isSelectionModeEnabled = false
         notifyDataSetChanged()
-        delCallback(true)
+        deleteFileCallback.onDeleteFileSelected(true)
     }
 
     override fun getItemCount(): Int = mergeItems.size
-
-    private fun showBottomSheet(context: Context, item: MergeDownloadItem, position: Int) {
-        val bottomSheetFragment = DownloadMenu()
-
-        bottomSheetFragment.setOnOptionClickListener(object : DownloadMenu.OnOptionClickListener {
-            override fun onRepostInstagramClicked() {
-                shareFileToInstagram(context, item.file, isVideoFile(item.file))
-            }
-
-            override fun onShareClicked() {
-                shareFile(context, item.file)
-            }
-
-            override fun onShareWhatsAppClicked() {
-                shareOnWhatsApp(context, item.file)
-            }
-
-            override fun onRenameClicked() {
-                showRenameDialog(context, item, position)
-            }
-
-            override fun onDeleteClicked() {
-                showDeleteConfirmationDialog(context, item)
-            }
-
-            override fun onPostOpenInstagram() {
-                item.url.openInstagramPostInApp(context)
-            }
-        })
-
-        bottomSheetFragment.show(
-            (context as AppCompatActivity).supportFragmentManager,
-            bottomSheetFragment.tag
-        )
-    }
-
-    private fun showDeleteConfirmationDialog(context: Context, item: MergeDownloadItem) {
-        val dialog = DeleteConfirmationDialogFragment("1") {
-            deleteFile(context, item)
-        }
-        dialog.show(
-            (context as AppCompatActivity).supportFragmentManager,
-            "DeleteConfirmationDialog"
-        )
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun deleteFile(context: Context, item: MergeDownloadItem) {
-        val contentUri = MediaStore.Files.getContentUri("external")
-        val selection = "${MediaStore.Files.FileColumns.DATA} = ?"
-        val selectionArgs = arrayOf(item.file.absolutePath)
-        val rowsDeleted = context.contentResolver.delete(contentUri, selection, selectionArgs)
-        if (rowsDeleted > 0) {
-            delCallback(true)
-//            files.remove(item.file)
-            notifyDataSetChanged()
-        }
-    }
-
-    private fun showRenameDialog(context: Context, item: MergeDownloadItem, position: Int) {
-        val renameDialogFragment = RenameDialogFragment().apply {
-            arguments = Bundle().apply {
-                putString("fileName", item.file.name)
-                putInt("position", position)
-            }
-            setRenameListener(object : RenameDialogFragment.RenameListener {
-                override fun onRenameConfirmed(newName: String) {
-                    renameFile(context, item, newName, position)
-                }
-            })
-        }
-        renameDialogFragment.show((context as AppCompatActivity).supportFragmentManager, "RenameDialog")
-    }
-
-    private fun renameFile(context: Context, item: MergeDownloadItem, newName: String, position: Int) {
-        val newFile = File(item.file.parent, newName)
-        if (item.file.renameTo(newFile)) {
-            mergeItems[position].file = newFile
-            notifyItemChanged(position)
-        } else {
-            Toast.makeText(context, "Failed to rename file", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-//    fun setUsernameAndCaption(username: String, caption: String) {
-//        this.username = username
-//        this.caption = caption
-//    }
 
     inner class DownloadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imageView: ImageView = itemView.findViewById(R.id.imageView)
@@ -208,11 +104,8 @@ class DownloadAdapter(
         private val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
         private val profileImage: ShapeableImageView = itemView.findViewById(R.id.ivProfile)
 
-//        private lateinit var file: File
-
         @SuppressLint("SetTextI18n")
         fun bind(item: MergeDownloadItem) {
-//            this.file = mergeItem.file
 
             checkBox.visibility = if (isSelectionModeEnabled) View.VISIBLE else View.GONE
             ivMenuIcon.visibility = if (isSelectionModeEnabled) View.GONE else View.VISIBLE
@@ -221,7 +114,7 @@ class DownloadAdapter(
             checkBox.isChecked = selectedFiles.contains(item)
 
             itemView.setOnLongClickListener {
-                if (isSelectionModeEnabled) return@setOnLongClickListener  false
+                if (isSelectionModeEnabled) return@setOnLongClickListener false
                 isSelectionModeEnabled = true
                 toggleSelection(item) {
                     isAllSelected = mergeItems.size == selectedFiles.size

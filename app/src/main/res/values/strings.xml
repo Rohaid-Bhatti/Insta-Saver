@@ -30,6 +30,7 @@
     <string name="paste_link">Paste Link</string>
     <string name="recent_downloaded">Recent Downloaded</string>
     <string name="view_all">View All</string>
+    <string name="recently_search">Recently Search</string>
 
     <!--Language Activity-->
     <string name="save_btn">Save</string>
@@ -76,4 +77,8 @@
     <!--Delete Dialog box-->
     <string name="delete_dialog_box">Delete!</string>
     <string name="desc_delete_dialogbox">Do you want to delete?</string>
+
+    <!--Verify Url Dialog box-->
+    <string name="verifying_url">Verifying URL</string>
+    <string name="checking_the_validity">Checking the validity and reliability of URL</string>
 </resources>

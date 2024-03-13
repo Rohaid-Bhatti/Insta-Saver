@@ -1,6 +1,7 @@
 package com.hazel.instadownloader.core.extensions
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,6 +21,7 @@ import com.hazel.instadownloader.R
 import com.hazel.instadownloader.app.activities.ImageActivity
 import com.hazel.instadownloader.app.activities.PlayerActivity
 import com.hazel.instadownloader.app.utils.SHARE_APP_INTENT_TAG
+import com.hazel.instadownloader.core.database.RecentSearchItem
 import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
 import java.io.File
 
@@ -169,4 +171,16 @@ private fun isIntentAvailable(context: Context, intent: Intent): Boolean {
     val packageManager = context.packageManager
     val activities = packageManager?.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
     return activities?.isNotEmpty() ?: false
+}
+
+fun openInstagramProfile(item: RecentSearchItem, context: Context) {
+    val username = item.username
+    val uri = Uri.parse("https://www.instagram.com/$username")
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+    intent.setPackage("com.instagram.android")
+    try {
+        startActivity(context, intent, null)
+    } catch (e: ActivityNotFoundException) {
+        startActivity(context, Intent(Intent.ACTION_VIEW, uri), null)
+    }
 }

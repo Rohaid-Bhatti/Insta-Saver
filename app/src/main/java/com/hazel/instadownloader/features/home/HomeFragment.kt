@@ -17,21 +17,26 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.net.toUri
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import com.google.android.material.imageview.ShapeableImageView
 import com.hazel.instadownloader.R
-import com.hazel.instadownloader.core.database.AppDatabase
+import com.hazel.instadownloader.app.adapters.RecentSearchAdapter
 import com.hazel.instadownloader.core.database.DownloadedItem
-import com.hazel.instadownloader.core.database.DownloadedUrlRepository
 import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
+import com.hazel.instadownloader.core.database.RecentSearchItem
+import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.isImageFile
 import com.hazel.instadownloader.core.extensions.isVideoFile
+import com.hazel.instadownloader.core.extensions.openInstagramProfile
 import com.hazel.instadownloader.core.extensions.playVideo
 import com.hazel.instadownloader.core.extensions.shareFile
 import com.hazel.instadownloader.core.extensions.shareFileToInstagram
@@ -40,13 +45,15 @@ import com.hazel.instadownloader.core.extensions.showImage
 import com.hazel.instadownloader.databinding.FragmentHomeBinding
 import com.hazel.instadownloader.features.bottomSheets.DownloadMenu
 import com.hazel.instadownloader.features.dialogBox.DeleteConfirmationDialogFragment
+import com.hazel.instadownloader.features.dialogBox.RenameDialogFragment
+import com.hazel.instadownloader.features.dialogBox.VerifyingUrlDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -56,6 +63,7 @@ class HomeFragment : Fragment() {
     private var cleanUsername: String? = null
     private var cleanCaption: String? = null
     private var cleanPostUrl: String? = null
+    private var cleanProfilePic: String? = null
     private val viewModel: DownloadedUrlViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -71,11 +79,6 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         activity?.let { viewModel.init(it) }
-        /*viewModel = DownloadedUrlViewModel(
-            DownloadedUrlRepository(
-                AppDatabase.getDatabase(requireContext()).downloadedUrlDao()
-            )
-        )*/
 
         if (!Python.isStarted()) {
             activity?.let { AndroidPlatform(it) }?.let { Python.start(it) }
@@ -106,8 +109,29 @@ class HomeFragment : Fragment() {
             binding.etUrl.setText(postUrl)
         }
 
+        //for showing the recent search items
+        viewModel.allSearchedItems?.observe(viewLifecycleOwner) { recentItems ->
+            if (recentItems.isNotEmpty()) {
+                binding.layoutRecentSearch.visibility = View.VISIBLE
+                val sortedList = recentItems.sortedByDescending { it.id }
+                val adapter = RecentSearchAdapter(sortedList) { item ->
+                    activity?.let { openInstagramProfile(item, it) }
+                }
+                binding.rvRecentSearchItem.adapter = adapter
+            } else {
+                binding.layoutRecentSearch.visibility = View.GONE
+            }
+        }
+//        binding.rvRecentSearchItem.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvRecentSearchItem.layoutManager = GridLayoutManager(activity, 4)
+
         val drawableStart = resources.getDrawable(R.drawable.url_link_icon)
-        binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableStart, null, null, null)
+        binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            drawableStart,
+            null,
+            null,
+            null
+        )
 
         binding.etUrl.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -116,7 +140,12 @@ class HomeFragment : Fragment() {
                 val hasText = !s.isNullOrEmpty() // Check if text is not null or empty
                 val drawable = if (hasText) resources.getDrawable(R.drawable.ic_close) else null
 
-                binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableStart, null, drawable, null)
+                binding.etUrl.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    drawableStart,
+                    null,
+                    drawable,
+                    null
+                )
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -152,7 +181,26 @@ class HomeFragment : Fragment() {
         }
 
         binding.tvDownload.setOnClickListener {
-            downloadFun(linkDownloader, posts, downloader)
+            val url = binding.etUrl.text.toString()
+
+            val verifyingDialog = VerifyingUrlDialogFragment()
+            verifyingDialog.show(childFragmentManager, "VerifyingUrlDialog")
+
+            lifecycleScope.launch(Dispatchers.Main) {
+                delay(2000)
+
+                viewModel.checkIfUrlExists(url) { urlExists ->
+                    verifyingDialog.dismiss()
+                    Log.d("TESTING_URL", "onViewCreated: $urlExists")
+                    if (urlExists != null) {
+                        Toast.makeText(activity, "Item is already downloaded", Toast.LENGTH_LONG)
+                            .show()
+                    } else {
+                        downloadFun(linkDownloader, posts, downloader)
+                    }
+                }
+//            downloadFun(linkDownloader, posts, downloader)
+            }
         }
 
         binding.tvViewDownloads.setOnClickListener {
@@ -166,10 +214,14 @@ class HomeFragment : Fragment() {
 
         latestDownloadedMediaFile?.let { file ->
             displayDownloadedMedia(file)
-            binding.layoutVideo.visibility = View.VISIBLE
+            binding.container.visibility = View.VISIBLE
+            binding.tvRecentDownloads.visibility = View.VISIBLE
+            binding.tvViewDownloads.visibility = View.VISIBLE
             binding.StatusText.visibility = View.GONE
         } ?: run {
-            binding.layoutVideo.visibility = View.GONE
+            binding.container.visibility = View.GONE
+            binding.tvRecentDownloads.visibility = View.GONE
+            binding.tvViewDownloads.visibility = View.GONE
             binding.StatusText.visibility = View.VISIBLE
         }
     }
@@ -191,7 +243,10 @@ class HomeFragment : Fragment() {
         try {
             if (binding.etUrl.text.toString() != "") {
                 Toast.makeText(requireContext(), "Download Started", Toast.LENGTH_LONG).show()
-                binding.layoutPB.visibility = View.VISIBLE
+                binding.viewLayoutBg.visibility = View.VISIBLE
+                binding.animationView.visibility = View.VISIBLE
+                binding.tvRecentDownloads.visibility = View.VISIBLE
+                binding.tvViewDownloads.visibility = View.VISIBLE
 
                 if (binding.etUrl.text.toString()
                         .startsWith("https://www.instagram.com/")
@@ -219,27 +274,41 @@ class HomeFragment : Fragment() {
 
                             Log.d("TESTING_MODE", "downloadFun: $testing")
                             val resultString = testing?.toString()
-                            val (caption, username, postUrl) = resultString!!.split("', '")
-                            cleanUsername = username.replace(")", "").replace("'", "")
+                            val (caption, username, postUrl, profile) = resultString!!.split("', '")
+                            cleanUsername = username.replace("'", "")
                             cleanCaption =
                                 caption.replace("(", "").replace("'", "").replace("\\n", "")
-                            cleanPostUrl = postUrl.replace(")", "").replace("'", "")
-
-                            Log.d("TESTING_MODE", "after cleaning username: $cleanUsername")
-                            Log.d("TESTING_MODE", "after cleaning caption: $cleanCaption")
-                            Log.d("TESTING_MODE", "after cleaning Url: $cleanPostUrl")
+                            cleanPostUrl = postUrl.replace("'", "")
+                            cleanProfilePic = profile.replace(")", "").replace("'", "")
 
                             val downloadedItem = DownloadedItem(
                                 url = binding.etUrl.text.toString(),
                                 fileName = formattedDate,
                                 postUrl = cleanPostUrl ?: "",
                                 caption = cleanCaption ?: "",
-                                username = cleanUsername ?: ""
+                                username = cleanUsername ?: "",
+                                profile = cleanProfilePic ?: ""
                             )
+
+                            val searchItem = RecentSearchItem(
+                                fileName = formattedDate,
+                                username = cleanUsername ?: "",
+                                profile = cleanProfilePic ?: ""
+                            )
+
                             viewModel.insertDownloadedItem(downloadedItem)
 
+                            // making the changing for limit the list to 8
+                            val itemCount = viewModel.getCountOfSearchItems()
+                            if (itemCount >= 8) {
+                                viewModel.deleteOldestSearchItems(itemCount - 7)
+                            }
+
+                            viewModel.insertSearchedItem(searchItem)
+
                             requireActivity().runOnUiThread {
-                                binding.layoutPB.visibility = View.GONE
+                                binding.viewLayoutBg.visibility = View.GONE
+                                binding.animationView.visibility = View.GONE
                                 Toast.makeText(
                                     requireContext(),
                                     "Download Finished",
@@ -251,7 +320,8 @@ class HomeFragment : Fragment() {
 
                         } catch (error: Throwable) {
                             activity?.runOnUiThread {
-                                binding.layoutPB.visibility = View.GONE
+                                binding.viewLayoutBg.visibility = View.GONE
+                                binding.animationView.visibility = View.GONE
                                 Toast.makeText(
                                     requireContext(),
                                     "Something went wrong",
@@ -316,25 +386,34 @@ class HomeFragment : Fragment() {
         val ivRecentPlayIcon = downloadItemView.findViewById<ImageView>(R.id.ivRecentPlayIcon)
         val tvRecentName = downloadItemView.findViewById<TextView>(R.id.tvRecentName)
         val ivRecentMenu = downloadItemView.findViewById<ImageView>(R.id.ivRecentMenu)
+        val ivProfile = downloadItemView.findViewById<ShapeableImageView>(R.id.ivProfileRecent)
         val ivRecentShare = downloadItemView.findViewById<ImageView>(R.id.ivRecentShare)
         val isVideo = isVideoFile(mediaUri)
 
         if (isImageFile(mediaUri)) {
-            binding.layoutVideo.visibility = View.VISIBLE
+            binding.container.visibility = View.VISIBLE
+            binding.tvRecentDownloads.visibility = View.VISIBLE
+            binding.tvViewDownloads.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
                 .into(ivThumbnail)
+
             ivThumbnail.visibility = View.VISIBLE
             ivRecentPlayIcon.visibility = View.GONE
         } else if (isVideoFile(mediaUri)) {
-            binding.layoutVideo.visibility = View.VISIBLE
+            binding.container.visibility = View.VISIBLE
+            binding.tvRecentDownloads.visibility = View.VISIBLE
+            binding.tvViewDownloads.visibility = View.VISIBLE
             Glide.with(this)
                 .load(mediaUri)
                 .into(ivThumbnail)
+
             ivThumbnail.visibility = View.VISIBLE
             ivRecentPlayIcon.visibility = View.VISIBLE
         } else {
-            binding.layoutVideo.visibility = View.GONE
+            binding.container.visibility = View.GONE
+            binding.tvRecentDownloads.visibility = View.GONE
+            binding.tvViewDownloads.visibility = View.GONE
         }
 
         ivThumbnail.setOnClickListener {
@@ -363,12 +442,26 @@ class HomeFragment : Fragment() {
                 }
 
                 override fun onRenameClicked() {
-                    // Handle rename click action
+                    val renameDialogFragment = RenameDialogFragment().apply {
+                        arguments = Bundle().apply {
+                            putString("fileName", mediaUri.name)
+                        }
+
+                        setRenameListener(object : RenameDialogFragment.RenameListener {
+                            override fun onRenameConfirmed(newName: String) {
+//                                renameFile(context, item, newName, position)
+                                renameFile(mediaUri, newName)
+                            }
+                        })
+                    }
+                    renameDialogFragment.show(
+                        (context as AppCompatActivity).supportFragmentManager,
+                        "RenameDialog"
+                    )
                 }
 
                 override fun onDeleteClicked() {
                     val dialog = DeleteConfirmationDialogFragment("1") {
-//                        deleteFile(context, file)
                         deleteFile(mediaUri)
                     }
                     activity?.let { it1 ->
@@ -380,23 +473,75 @@ class HomeFragment : Fragment() {
                 }
 
                 override fun onPostOpenInstagram() {
-                    TODO("Not yet implemented")
+
                 }
             })
         }
 
         ivRecentShare.setOnClickListener {
-            activity?.let { it1 -> shareFile(it1, mediaUri) }
+            debounce(binding.root) {
+                activity?.let { it1 -> shareFile(it1, mediaUri) }
+            }
         }
 
         tvRecentName.text = mediaUri.name
+
+        viewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
+            val matchedItem = downloadedItems.find { it.fileName == mediaUri.nameWithoutExtension }
+            val username = matchedItem?.username ?: ""
+            val nameToShow =
+                username.ifEmpty { mediaUri.name }
+            tvRecentName.text = nameToShow
+
+            Glide.with(this)
+                .load(matchedItem?.profile)
+                .into(ivProfile)
+        }
+
         binding.container.addView(downloadItemView)
+    }
+
+    private fun renameFile(file: File, newName: String) {
+        val directory = file.parentFile
+        val newFile = File(directory, newName)
+
+        val oldName = file.name.split(".")[0]
+        val nName = newName.split(".")[0]
+
+        if (file.exists()) {
+            if (file.renameTo(newFile)) {
+                updateFileNameInDatabase(oldName, nName)
+            } else {
+                Toast.makeText(context, "Failed to rename file", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateFileNameInDatabase(oldName: String, newName: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.updateFileName(oldName, newName)
+        }
     }
 
     private fun deleteFile(file: File) {
         if (file.exists()) {
-            binding.layoutVideo.visibility = View.GONE
+//            viewModel.deleteDownloadedItem()
+            val nameWithoutExt = file.name.split(".")[0]
+            viewModel.allDownloadedItems?.value?.firstOrNull { it.fileName == nameWithoutExt }
+                ?.let { item ->
+                    deleteFromDatabase(item)
+                }
+
+            binding.container.visibility = View.GONE
+            binding.tvRecentDownloads.visibility = View.GONE
+            binding.tvViewDownloads.visibility = View.GONE
             file.delete()
+        }
+    }
+
+    private fun deleteFromDatabase(item: DownloadedItem) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.deleteDownloadedItem(item.fileName)
         }
     }
 
