@@ -65,7 +65,7 @@
                 android:layout_marginBottom="@dimen/padding_page_large"
                 android:backgroundTint="@color/titleColor"
                 android:fontFamily="@font/sf_pro_rounded_bold"
-                android:paddingVertical="12dp"
+                android:paddingVertical="@dimen/padding_page"
                 android:text="@string/save_btn"
                 android:textSize="16sp"
                 android:textColor="@color/white"

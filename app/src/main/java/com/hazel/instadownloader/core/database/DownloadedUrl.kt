@@ -12,5 +12,6 @@ data class DownloadedItem(
     val postUrl: String,
     val caption: String,
     val username: String,
-    val profile : String
+    val profile : String,
+    val filePath : String
 )

@@ -1,6 +1,5 @@
 package com.hazel.instadownloader.core.database
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -16,11 +15,9 @@ interface DownloadedUrlDao {
     @Query("SELECT * FROM downloaded_urls")
     fun getAllDownloadedItems(): Flow<List<DownloadedItem>>
 
-    @Query("UPDATE downloaded_urls SET fileName = :newName WHERE fileName = :oldName")
-    suspend fun updateFileName(oldName: String, newName: String)
+    @Query("UPDATE downloaded_urls SET fileName = :newName, filePath = :newPath WHERE fileName = :oldName")
+    suspend fun updateFileName(oldName: String, newName: String, newPath: String)
 
-    /*@Delete
-    suspend fun deleteDownloadedItem(item: DownloadedItem)*/
     @Query("DELETE FROM downloaded_urls WHERE fileName = :fileName")
     suspend fun deleteDownloadedItem(fileName: String)
 
@@ -38,4 +35,13 @@ interface DownloadedUrlDao {
 
     @Query("DELETE FROM recent_table WHERE id IN (SELECT id FROM recent_table ORDER BY id ASC LIMIT :countToDelete)")
     suspend fun deleteOldestSearchItems(countToDelete: Int)
+
+    @Query("DELETE FROM recent_table WHERE username = :userName")
+    suspend fun deleteSearchItems(userName: String)
+
+    @Query("SELECT * FROM recent_table WHERE username = :cleanUsername")
+    suspend fun findRecentByUsername(cleanUsername: String): RecentSearchItem?
+
+    @Query("DELETE FROM recent_table")
+    suspend fun clearRecentSearchHistory()
 }

@@ -1,6 +1,5 @@
 package com.hazel.instadownloader.features.dialogBox
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -11,20 +10,11 @@ import android.view.Window
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import com.hazel.instadownloader.R
-import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
-import com.hazel.instadownloader.features.download.model.MergeDownloadItem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.File
 
 
-class RenameDialogFragment() : DialogFragment() {
+class RenameDialogFragment : DialogFragment() {
     private var renameListener: RenameListener? = null
 
     interface RenameListener {

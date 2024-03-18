@@ -185,6 +185,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
+                <TextView
+                    android:id="@+id/tvRecentViewAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_all"
+                    android:textColor="@color/ViewAllColor"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/sf_pro_rounded_medium"
+                    app:drawableEndCompat="@drawable/view_all_icon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/tvRecentSearch"
+                    app:layout_constraintTop_toTopOf="@id/tvRecentSearch"/>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvRecentSearchItem"
                     android:layout_width="match_parent"

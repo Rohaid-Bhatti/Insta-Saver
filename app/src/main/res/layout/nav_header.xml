@@ -68,13 +68,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginVertical="@dimen/remove_ad_margin"
             android:layout_marginStart="@dimen/edit_text_padding_vertical"
             android:layout_marginEnd="@dimen/remove_ad_margin"
-            android:src="@drawable/premium_nav"/>
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/crown" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="0dp"

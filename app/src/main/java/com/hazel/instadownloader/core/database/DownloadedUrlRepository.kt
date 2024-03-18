@@ -1,6 +1,6 @@
 package com.hazel.instadownloader.core.database
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 
 class DownloadedUrlRepository(
@@ -14,8 +14,8 @@ class DownloadedUrlRepository(
         downloadedUrlDao.insertDownloadedItem(item)
     }
 
-    suspend fun updateFileName(oldName: String, newName: String) {
-        downloadedUrlDao.updateFileName(oldName, newName)
+    suspend fun updateFileName(oldName: String, newName: String, newPath: String) {
+        downloadedUrlDao.updateFileName(oldName, newName, newPath)
     }
 
     suspend fun deleteDownloadedItem(fieName: String) {
@@ -26,15 +26,25 @@ class DownloadedUrlRepository(
         return downloadedUrlDao.checkIfUrlExists(url)
     }
 
-    suspend fun insertSearchItem(item: RecentSearchItem) {
-        downloadedUrlDao.insertSearchItem(item)
-    }
-
     fun getCountOfSearchItems(): Int {
         return downloadedUrlDao.getCountOfSearchItems()
     }
 
     suspend fun deleteOldestSearchItems(countToDelete: Int) {
         downloadedUrlDao.deleteOldestSearchItems(countToDelete)
+    }
+
+    suspend fun insertOrUpdateRecentItem(recentItem: RecentSearchItem) {
+        val existingItem = downloadedUrlDao.findRecentByUsername(recentItem.username)
+        if (existingItem != null) {
+            downloadedUrlDao.deleteSearchItems(recentItem.username)
+            downloadedUrlDao.insertSearchItem(recentItem)
+        } else {
+            downloadedUrlDao.insertSearchItem(recentItem)
+        }
+    }
+
+    suspend fun clearRecentSearchHistory() {
+        downloadedUrlDao.clearRecentSearchHistory()
     }
 }

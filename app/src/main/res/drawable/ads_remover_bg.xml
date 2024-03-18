@@ -8,5 +8,5 @@
         android:startColor="@color/SettingScreenCardGradientStartColor"
         android:endColor="@color/SettingScreenCardGradientEndColor"
         android:type="linear"
-        android:angle="0" />
+        android:angle="180" />
 </shape>

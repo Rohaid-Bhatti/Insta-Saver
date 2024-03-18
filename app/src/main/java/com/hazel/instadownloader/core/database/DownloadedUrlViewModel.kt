@@ -8,7 +8,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.hazel.instadownloader.app.utils.DataStores
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -16,9 +19,15 @@ class DownloadedUrlViewModel : ViewModel() {
     private var repository: DownloadedUrlRepository? = null
     var allDownloadedItems: LiveData<List<DownloadedItem>>? = null
     var allSearchedItems: LiveData<List<RecentSearchItem>>? = null
-    val filesLiveData: MutableLiveData<List<File>> = MutableLiveData()
+//    val filesLiveData: MutableLiveData<List<File>> = MutableLiveData()
+    val _autoDownloadingMutableLiveData = MutableLiveData(false)
+    val autoDownloadingLiveData: LiveData<Boolean> = _autoDownloadingMutableLiveData
 
-    fun init(context: Context){
+    fun setAutoDownloadBoolean(isTurnOn: Boolean) {
+        _autoDownloadingMutableLiveData.postValue(isTurnOn)
+    }
+
+    fun init(context: Context) {
         val dao = AppDatabase.getDatabase(context).downloadedUrlDao()
         repository = DownloadedUrlRepository(dao)
         allDownloadedItems = repository?.allDownloadedItems!!.asLiveData()
@@ -31,9 +40,9 @@ class DownloadedUrlViewModel : ViewModel() {
         }
     }
 
-    fun updateFileName(oldName: String, newName: String) {
+    fun updateFileName(oldName: String, newName: String, newPath: String) {
         viewModelScope.launch {
-            repository?.updateFileName(oldName, newName)
+            repository?.updateFileName(oldName, newName, newPath)
         }
     }
 
@@ -50,12 +59,6 @@ class DownloadedUrlViewModel : ViewModel() {
         }
     }
 
-    fun insertSearchedItem(item: RecentSearchItem) {
-        viewModelScope.launch {
-            repository?.insertSearchItem(item)
-        }
-    }
-
     fun getCountOfSearchItems(): Int {
         return repository?.getCountOfSearchItems()!!
     }
@@ -66,25 +69,16 @@ class DownloadedUrlViewModel : ViewModel() {
         }
     }
 
-    fun loadFiles() {
-        val files = loadFilesInBackground()
-        filesLiveData.postValue(files)
+    fun insertOrUpdateRecentItem(recentItem: RecentSearchItem) {
+        viewModelScope.launch {
+            repository?.insertOrUpdateRecentItem(recentItem)
+        }
     }
 
-    private fun loadFilesInBackground(): List<File> {
-        val downloadFolder =
-            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "InstaDownloader")
-
-        val files = downloadFolder.listFiles { file ->
-            file.isFile &&
-                    (file.extension.equals("jpg", ignoreCase = true) ||
-                            file.extension.equals("png", ignoreCase = true) ||
-                            file.extension.equals("jpeg", ignoreCase = true) ||
-                            file.extension.equals("mp4", ignoreCase = true) ||
-                            file.extension.equals("3gp", ignoreCase = true) ||
-                            file.extension.equals("mkv", ignoreCase = true))
-        }?.toList() ?: emptyList()
-
-        return files.sortedByDescending { it.lastModified() }
+    fun clearRecentSearchHistory() {
+        viewModelScope.launch {
+            repository?.clearRecentSearchHistory()
+            allSearchedItems = repository?.allSearchItems!!.asLiveData()
+        }
     }
 }

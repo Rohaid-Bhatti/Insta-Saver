@@ -60,6 +60,7 @@
                 android:textColor="@color/subtitleColor"
                 android:backgroundTint="@color/PermissionDialogColor"
                 android:fontFamily="@font/sf_pro_rounded_bold"
+                android:paddingVertical="@dimen/padding_page"
                 android:layout_marginTop="@dimen/remove_ad_margin"
                 android:paddingHorizontal="@dimen/image_size"
                 app:layout_constraintTop_toBottomOf="@+id/tvDialogContent"

@@ -11,18 +11,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.imageview.ShapeableImageView
 import com.hazel.instadownloader.R
+import com.hazel.instadownloader.core.database.DownloadedItem
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.openInstagramPostInApp
 import com.hazel.instadownloader.core.extensions.playVideo
 import com.hazel.instadownloader.core.extensions.showImage
-import com.hazel.instadownloader.features.download.model.MergeDownloadItem
+import java.io.File
 
 class DownloadAdapter(
-    private val mergeItems: List<MergeDownloadItem>,
+    private val mergeItems: List<DownloadedItem>,
     private var deleteFileCallback: DeleteFileCallback
 ) : RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder>() {
 
-    val selectedFiles = HashSet<MergeDownloadItem>()
+    val selectedFiles = HashSet<DownloadedItem>()
     var isSelectionModeEnabled = false
     private var selectionModeListener: SelectionModeListener? = null
     var isAllSelected = false
@@ -46,12 +47,12 @@ class DownloadAdapter(
         holder.bind(mergeItem)
 
         holder.ivMenuIcon.setOnClickListener {
-            deleteFileCallback.onShowingMenu(mergeItem, position, selectedFiles)
+            deleteFileCallback.onShowingMenu(mergeItem, position)
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun toggleSelection(item: MergeDownloadItem, onAllAdded: () -> Unit) {
+    private fun toggleSelection(item: DownloadedItem, onAllAdded: () -> Unit) {
 
         if (selectedFiles.contains(item)) {
             selectedFiles.remove(item)
@@ -81,17 +82,6 @@ class DownloadAdapter(
         isAllSelected = selectedFiles.size == mergeItems.size
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun deleteSelectedFiles() {
-        selectedFiles.forEach { item ->
-            item.file.delete()
-        }
-        selectedFiles.clear()
-        isSelectionModeEnabled = false
-        notifyDataSetChanged()
-        deleteFileCallback.onDeleteFileSelected(true)
-    }
-
     override fun getItemCount(): Int = mergeItems.size
 
     inner class DownloadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -105,7 +95,7 @@ class DownloadAdapter(
         private val profileImage: ShapeableImageView = itemView.findViewById(R.id.ivProfile)
 
         @SuppressLint("SetTextI18n")
-        fun bind(item: MergeDownloadItem) {
+        fun bind(item: DownloadedItem) {
 
             checkBox.visibility = if (isSelectionModeEnabled) View.VISIBLE else View.GONE
             ivMenuIcon.visibility = if (isSelectionModeEnabled) View.GONE else View.VISIBLE
@@ -128,15 +118,15 @@ class DownloadAdapter(
                         isAllSelected = mergeItems.size == selectedFiles.size
                     }
                 } else {
-                    if (isVideoFile(item.file)) {
-                        playVideo(itemView.context, adapterPosition, mergeItems.map { it.file })
+                    if (isVideoFile(File(item.filePath))) {
+                        playVideo(itemView.context, adapterPosition, mergeItems.map { File(it.filePath) })
                     } else {
-                        showImage(itemView.context, adapterPosition, mergeItems.map { it.file })
+                        showImage(itemView.context, adapterPosition, mergeItems.map { File(it.filePath) })
                     }
                 }
             }
 
-            if (isVideoFile(item.file)) {
+            if (isVideoFile(File(item.filePath))) {
                 playIcon.visibility = View.VISIBLE
                 playIcon.contentDescription = "Play video"
                 textViewFileName.text = item.username/*file.name*/
@@ -155,7 +145,7 @@ class DownloadAdapter(
                 .into(profileImage)
 
             Glide.with(itemView.context)
-                .load(item.file)
+                .load(File(item.filePath))
                 .into(imageView)
         }
     }

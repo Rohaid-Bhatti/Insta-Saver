@@ -34,12 +34,6 @@ class ImageActivity : AppCompatActivity() {
         binding = ActivityImageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        /*binding.toolbarImage.myToolbar.title = ""
-        setSupportActionBar(binding.toolbarImage.myToolbar)
-        setSupportActionBar(binding.toolbarImage.root)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-        }*/
         binding.toolbarImage.ivMenuBack.setImageResource(R.drawable.ic_arrow_back)
         binding.toolbarImage.ivMenuBack.setOnClickListener {
             finish()
@@ -73,28 +67,8 @@ class ImageActivity : AppCompatActivity() {
         viewPager.setCurrentItem(position, false)
 
         isVideo = isVideoFile(File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
-        /*binding.detailsButton.setOnClickListener {
-            showImageDetails(viewPager.currentItem)
-        }
 
-        binding.shareButton.setOnClickListener {
-            shareFile(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
-        }
-
-        binding.deleteButton.setOnClickListener {
-            showDeleteConfirmationDialog(viewPager.currentItem)
-        }*/
     }
-
-    /*private fun showImageDetails(position: Int) {
-        val file = File(Uri.parse(imageUris[position]).path!!)
-        val details = "Name: ${file.name}\nSize: ${file.length()} bytes"
-        AlertDialog.Builder(this)
-            .setTitle("Image Details")
-            .setMessage(details)
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-            .show()
-    }*/
 
     private fun showDeleteConfirmationDialog(position: Int) {
         val dialog = DeleteConfirmationDialogFragment("1") {
@@ -116,35 +90,4 @@ class ImageActivity : AppCompatActivity() {
             imagePagerAdapter?.notifyDataSetChanged()
         }
     }
-
-    /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.image_activity_menu, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                return true
-            }
-            R.id.whatsAppIcon -> {
-                shareOnWhatsApp(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
-                return true
-            }
-            R.id.shareIcon -> {
-                shareFile(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()))
-                return true
-            }
-            R.id.repostIcon -> {
-                shareFileToInstagram(this, File(Uri.parse(imageUris[viewPager.currentItem]).path.toString()), isVideo!!)
-                return true
-            }
-            R.id.deleteIcon -> {
-                showDeleteConfirmationDialog(viewPager.currentItem)
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }*/
 }

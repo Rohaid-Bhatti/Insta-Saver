@@ -16,7 +16,7 @@ object DataStores {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
     private val PERMISSION_REQUEST_COUNT_KEY = intPreferencesKey("PERMISSION_REQUEST_COUNT_KEY")
     private val LANGUAGE_SELECTED_KEY = booleanPreferencesKey("LANGUAGE_SELECTED_KEY")
-//    private val SAVE_BUTTON_SHOWN_KEY = booleanPreferencesKey("SAVE_BUTTON_SHOWN_KEY")
+    private val AUTO_DOWNLOAD_KEY = booleanPreferencesKey("AUTO_DOWNLOAD_KEY")
 
     // Function to store the permission request count
     suspend fun storePermissionRequestCount(count: Int, context: Context) {
@@ -46,15 +46,17 @@ object DataStores {
         }
     }
 
-    /*suspend fun storeSaveButtonShown(context: Context, shown: Boolean) {
+    // Function to store the boolean of the auto download
+    suspend fun storeAutoDownload(context: Context, value: Boolean) {
         context.dataStore.edit { settings ->
-            settings[SAVE_BUTTON_SHOWN_KEY] = shown
+            settings[AUTO_DOWNLOAD_KEY] = value
         }
     }
 
-    fun isSaveButtonShown(context: Context): Flow<Boolean> {
+    // Function to get the boolean of the auto download
+    fun isAutoDownloadShown(context: Context): Flow<Boolean> {
         return context.dataStore.data.map { settings ->
-            settings[SAVE_BUTTON_SHOWN_KEY] ?: false
+            settings[AUTO_DOWNLOAD_KEY] ?: false
         }
-    }*/
+    }
 }

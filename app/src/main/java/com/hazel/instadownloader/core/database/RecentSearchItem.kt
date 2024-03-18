@@ -9,5 +9,5 @@ data class RecentSearchItem(
     val id: Long = 0,
     val fileName: String,
     val username: String,
-    val profile : String
+    val profile : String,
 )

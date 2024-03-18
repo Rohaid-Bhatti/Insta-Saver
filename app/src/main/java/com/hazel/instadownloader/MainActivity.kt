@@ -4,12 +4,19 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.CompoundButton
+import android.widget.Switch
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
@@ -21,6 +28,8 @@ import com.google.android.material.navigation.NavigationView
 import com.hazel.instadownloader.app.activities.LanguageActivity
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager
+import com.hazel.instadownloader.app.utils.switch
+import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
 import com.hazel.instadownloader.core.extensions.debounce
 import com.hazel.instadownloader.core.extensions.shareApp
 import com.hazel.instadownloader.databinding.ActivityMainBinding
@@ -30,13 +39,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.math.log
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityMainBinding
+    private val downloadViewModel: DownloadedUrlViewModel by viewModels()
     private var navController: NavController? = null
     private var postUrl: String? = null
     private var permissionRequestCount = 0
+    private var check: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +76,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
+        val autoDownloadView = binding.navView.getHeaderView(0)
+        val switchAuto = autoDownloadView.findViewById<SwitchCompat>(R.id.switchAutoDownload)
+
+        Log.d("TESTING_AUTO", "onCreate: $check")
+        switchAuto.setOnCheckedChangeListener { _: CompoundButton, b: Boolean ->
+            CoroutineScope(Dispatchers.Main).launch {
+                switch = b
+                downloadViewModel.setAutoDownloadBoolean(b)
+                DataStores.storeAutoDownload(this@MainActivity, b)
+            }
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            check = DataStores.isAutoDownloadShown(this@MainActivity).first()
+                .also { switchAuto.isChecked = it }
+            // downloadViewModel.setAutoDownloadBoolean(check)
+            Log.d("TESTING_AUTO", "checking the switch: $check")
+            withContext(Dispatchers.Main) {
+                val intent = intent
+                val action = intent.action
+                val type = intent.type
+                if ("android.intent.action.SEND" == action && type != null && "text/plain" == type) {
+                    postUrl = intent.getStringExtra("android.intent.extra.TEXT")
+                }
+
+                val bundle = Bundle()
+                bundle.putString("POST_URL", postUrl)
+                bundle.putBoolean("AUTO_DOWNLOAD", check)
+                val graph = navController?.navInflater?.inflate(R.navigation.nav_graph)
+                if (graph != null) {
+                    navController?.setGraph(graph, bundle)
+                }
+            }
+        }
+
+
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
@@ -72,24 +121,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.bottomNav.itemIconTintList = null
         binding.navView.setNavigationItemSelectedListener(this)
 
-        val headerView = binding.navView.getHeaderView(0)
-        val layoutLanguageNav = headerView.findViewById<ConstraintLayout>(R.id.layoutLanguageNav)
+        val lanHeaderView = binding.navView.getHeaderView(0)
+        val layoutLanguageNav = lanHeaderView.findViewById<ConstraintLayout>(R.id.layoutLanguageNav)
 
         layoutLanguageNav.setOnClickListener {
             val intent = Intent(this, LanguageActivity::class.java)
             startActivity(intent)
         }
-
-        val intent = intent
-        val action = intent.action
-        val type = intent.type
-        if ("android.intent.action.SEND" == action && type != null && "text/plain" == type) {
-            postUrl = intent.getStringExtra("android.intent.extra.TEXT")
-        }
-
-        val bundle = Bundle()
-        bundle.putString("POST_URL", postUrl)
-        this.navController!!.navigate(R.id.homeFragment, bundle)
     }
 
     private fun handlePermissionDenied() {
@@ -103,8 +141,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun showCustomPermissionDeniedDialog() {
         val dialogFragment = PermissionCheckDialogFragment()
         dialogFragment.show(
-                this.supportFragmentManager, "PermissionDeniedDialogFragment"
-            )
+            this.supportFragmentManager, "PermissionDeniedDialogFragment"
+        )
     }
 
     //for permissions
@@ -174,7 +212,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-        ivPremiumMenu.setOnClickListener{
+        ivPremiumMenu.setOnClickListener {
             Toast.makeText(this@MainActivity, "Premium Clicked!", Toast.LENGTH_SHORT).show()
         }
     }

@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager.checkPermission
+import com.hazel.instadownloader.core.database.DownloadedItem
 import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
 import com.hazel.instadownloader.core.extensions.isVideoFile
 import com.hazel.instadownloader.core.extensions.openInstagramPostInApp
@@ -35,7 +36,6 @@ import com.hazel.instadownloader.features.dialogBox.PermissionCheckDialogFragmen
 import com.hazel.instadownloader.features.dialogBox.RenameDialogFragment
 import com.hazel.instadownloader.features.download.adapter.DeleteFileCallback
 import com.hazel.instadownloader.features.download.adapter.DownloadAdapter
-import com.hazel.instadownloader.features.download.model.MergeDownloadItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -44,9 +44,8 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, DeleteFileCallback {
-    private  var mergeItemsList: MutableList<MergeDownloadItem> = ArrayList()
     private val downloadedUrlViewModel: DownloadedUrlViewModel by activityViewModels()
-    private lateinit var downloadAdapter: DownloadAdapter
+    private var downloadAdapter: DownloadAdapter? = null
     private var _binding: FragmentDownloadBinding? = null
     private val binding get() = _binding!!
 
@@ -121,30 +120,30 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         binding.checkBoxSelectAll.setOnClickListener {
             if (!isSelect) {
                 isSelect = true
-                downloadAdapter.selectAllItems(this.isSelect)
+                downloadAdapter?.selectAllItems(this.isSelect)
             } else {
                 isSelect = false
-                downloadAdapter.selectAllItems(this.isSelect)
+                downloadAdapter?.selectAllItems(this.isSelect)
             }
         }
 
         initBackPressDispatcher()
     }
 
-    private fun showItemMenuBottomSheet(context: Context, item: MergeDownloadItem, position: Int, selectedFiles: HashSet<MergeDownloadItem>) {
+    private fun showItemMenuBottomSheet(context: Context, item: DownloadedItem, position: Int) {
         val bottomSheetFragment = DownloadMenu()
 
         bottomSheetFragment.setOnOptionClickListener(object : DownloadMenu.OnOptionClickListener {
             override fun onRepostInstagramClicked() {
-                shareFileToInstagram(context, item.file, isVideoFile(item.file))
+                shareFileToInstagram(context, File(item.filePath), isVideoFile(File(item.filePath)))
             }
 
             override fun onShareClicked() {
-                shareFile(context, item.file)
+                shareFile(context, File(item.filePath))
             }
 
             override fun onShareWhatsAppClicked() {
-                shareOnWhatsApp(context, item.file)
+                shareOnWhatsApp(context, File(item.filePath))
             }
 
             override fun onRenameClicked() {
@@ -152,7 +151,7 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
             }
 
             override fun onDeleteClicked() {
-                showDeleteConfirmationDialog(context, item, selectedFiles)
+                showDeleteConfirmationDialog(context, item)
             }
 
             override fun onPostOpenInstagram() {
@@ -165,9 +164,9 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         )
     }
 
-    private fun showDeleteConfirmationDialog(context: Context, item: MergeDownloadItem, selectedFiles: HashSet<MergeDownloadItem>) {
+    private fun showDeleteConfirmationDialog(context: Context, item: DownloadedItem) {
         val dialog = DeleteConfirmationDialogFragment("1") {
-            deleteFile(context, item, selectedFiles)
+            deleteFile(context, item)
         }
         dialog.show(
             (context as AppCompatActivity).supportFragmentManager, "DeleteConfirmationDialog"
@@ -175,40 +174,28 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun deleteFile(context: Context, item: MergeDownloadItem, selectedFiles: HashSet<MergeDownloadItem>) {
+    private fun deleteFile(context: Context, item: DownloadedItem) {
         val contentUri = MediaStore.Files.getContentUri("external")
         val selection = "${MediaStore.Files.FileColumns.DATA} = ?"
-        val selectionArgs = arrayOf(item.file.absolutePath)
+        val selectionArgs = arrayOf(File(item.filePath).absolutePath)
         Log.d("TESTING_NAMES", "fileList: $selectionArgs")
 
         val rowsDeleted = context.contentResolver.delete(contentUri, selection, selectionArgs)
 
-        /*downloadedUrlViewModel.allDownloadedItems?.value?.firstOrNull { it.fileName == item.file.name.split(".")[0] }?.let { item ->
-            downloadedUrlViewModel.deleteDownloadedItem(item)
-        }
-        downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
-            downloadedItems.forEach { downloadedItem ->
-                if (downloadedItem.fileName == item.file.name.split(".")[0]) {
-                    downloadedUrlViewModel.deleteDownloadedItem(downloadedItem)
-                }
-            }
-        }*/
-
-        selectedFiles.forEach { fileName ->
-            Log.d("TESTING_NAMES", "deleteFile: $fileName")
-                downloadedUrlViewModel.deleteDownloadedItem(fileName.file.name.split(".")[0])
+        downloadedUrlViewModel.allDownloadedItems?.value?.firstOrNull { it.fileName == item.fileName.split(".")[0] }?.let { item ->
+            downloadedUrlViewModel.deleteDownloadedItem(item.fileName)
         }
 
         if (rowsDeleted > 0) {
             onDeleteFileSelected(true)
-            downloadAdapter.notifyDataSetChanged()
+            downloadAdapter?.notifyDataSetChanged()
         }
     }
 
-    private fun showRenameDialog(context: Context, item: MergeDownloadItem, position: Int) {
+    private fun showRenameDialog(context: Context, item: DownloadedItem, position: Int) {
         val renameDialogFragment = RenameDialogFragment().apply {
             arguments = Bundle().apply {
-                putString("fileName", item.file.name)
+                putString("fileName", item.fileName)
                 putInt("position", position)
             }
             setRenameListener(object : RenameDialogFragment.RenameListener {
@@ -223,18 +210,15 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
     }
 
     private fun renameFile(
-        context: Context, item: MergeDownloadItem, newName: String, position: Int
+        context: Context, item: DownloadedItem, newName: String, position: Int
     ) {
-        val newFile = File(item.file.parent, newName)
-        val oldName = item.file.name.split(".")[0]
+        val newFile = File(File(item.filePath).parent, newName)
+        val oldName = item.fileName.split(".")[0]
         val nName = newName.split(".")[0]
 
-//        downloadedUrlViewModel.updateFileName(oldName, nName)
-
-        if (item.file.renameTo(newFile)) {
-            downloadedUrlViewModel.updateFileName(oldName, nName)
-            mergeItemsList[position].file = newFile
-            downloadAdapter.notifyItemChanged(position)
+        if (File(item.filePath).renameTo(newFile)) {
+            downloadedUrlViewModel.updateFileName(oldName, nName, newFile.absolutePath)
+            downloadAdapter?.notifyItemChanged(position)
         } else {
             Toast.makeText(context, "Failed to rename file", Toast.LENGTH_SHORT).show()
         }
@@ -243,8 +227,18 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
 
     private fun showDeleteDialog() {
         val dialog =
-            DeleteConfirmationDialogFragment(downloadAdapter.selectedFiles.size.toString()) {
-                downloadAdapter.deleteSelectedFiles()
+            DeleteConfirmationDialogFragment(downloadAdapter?.selectedFiles?.size.toString()) {
+
+                downloadAdapter?.selectedFiles?.forEach { item ->
+                    File(item.filePath).delete()
+                    downloadedUrlViewModel.deleteDownloadedItem(item.fileName.split(".")[0])
+                }
+
+                downloadAdapter?.selectedFiles?.clear()
+                downloadAdapter?.isSelectionModeEnabled = false
+                downloadAdapter?.notifyDataSetChanged()
+                onDeleteFileSelected(true)
+
             }
         dialog.show(
             (context as AppCompatActivity).supportFragmentManager, "DeleteConfirmationDialog"
@@ -263,11 +257,11 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
             binding.textViewSelectedCount.visibility = View.VISIBLE
             binding.checkBoxSelectAll.visibility = View.VISIBLE
 
-            "${downloadAdapter.selectedFiles.size} Selected".also {
+            "${downloadAdapter?.selectedFiles?.size} Selected".also {
                 binding.textViewSelectedCount.text = it
             }
-            val allFilesSelected = downloadAdapter.isAllSelected
-            binding.checkBoxSelectAll.isChecked = allFilesSelected
+            val allFilesSelected = downloadAdapter?.isAllSelected
+            binding.checkBoxSelectAll.isChecked = allFilesSelected!!
         } else {
             binding.btnDelete.visibility = View.GONE
             binding.textViewSelectedCount.visibility = View.GONE
@@ -279,38 +273,19 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         lifecycleScope.launch(Dispatchers.Main) {
             delay(500)
 
-            downloadedUrlViewModel.loadFiles()
-
-            downloadedUrlViewModel.filesLiveData.observe(viewLifecycleOwner) { files ->
-                downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
-                    val mergeItems = mutableListOf<MergeDownloadItem>()
-
-                    files.forEach { file ->
-                        val filenameWithoutExt = file.name.split(".")[0]
-
-                        val downloadedItem = downloadedItems.find { it.fileName == filenameWithoutExt }
-                        val username = downloadedItem?.username ?: ""
-                        val caption = downloadedItem?.caption ?: ""
-                        val url = downloadedItem?.url ?: ""
-                        val profileUrl = downloadedItem?.profile ?: ""
-
-                        val mergeItem = MergeDownloadItem(file, username, caption, url, profileUrl)
-                        mergeItems.add(mergeItem)
-                    }
-
-                    updateUI(mergeItems)
-                    mergeItemsList = mergeItems
-                }
+            downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) {downloadedItems ->
+                val sortedList = downloadedItems.sortedByDescending { it.id }
+                updateUI(sortedList)
             }
         }
     }
 
-    private fun updateUI(mergeItems: List<MergeDownloadItem>) {
+    private fun updateUI(mergeItems: List<DownloadedItem>) {
         binding.progressBar.visibility = View.GONE
 
         if (mergeItems.isNotEmpty()) {
             downloadAdapter = DownloadAdapter(mergeItems, this)
-            downloadAdapter.setSelectionModeListener(this)
+            downloadAdapter?.setSelectionModeListener(this)
 
             binding.recyclerView.layoutManager = LinearLayoutManager(context)
             binding.recyclerView.adapter = downloadAdapter
@@ -401,13 +376,13 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (downloadAdapter.isSelectionModeEnabled) {
-                        downloadAdapter.selectAllItems(false)
-                        downloadAdapter.isSelectionModeEnabled = false
-                        downloadAdapter.notifyDataSetChanged()
+                    if (downloadAdapter?.isSelectionModeEnabled == true) {
+                        downloadAdapter?.selectAllItems(false)
+                        downloadAdapter?.isSelectionModeEnabled = false
+                        downloadAdapter?.notifyDataSetChanged()
                         Log.d(
                             "TESTING_FILES",
-                            "handleOnBackPressed: ${downloadAdapter.isSelectionModeEnabled}"
+                            "handleOnBackPressed: ${downloadAdapter?.isSelectionModeEnabled}"
                         )
                     } else {
                         findNavController().navigateUp()
@@ -416,15 +391,15 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
             })
     }
 
-    override fun onShowingMenu(mergeItem: MergeDownloadItem, position: Int, selectedFiles: HashSet<MergeDownloadItem>) {
-        activity?.let { showItemMenuBottomSheet(it, mergeItem, position, selectedFiles) }
+    override fun onShowingMenu(mergeItem: DownloadedItem, position: Int) {
+        activity?.let { showItemMenuBottomSheet(it, mergeItem, position) }
     }
 
     override fun onDeleteFileSelected(isFileSelected: Boolean) {
         if (isFileSelected) {
             loadFiles()
         }
-        toggleDeleteButtonVisibility(downloadAdapter.isSelectionModeEnabled)
+        downloadAdapter?.isSelectionModeEnabled?.let { toggleDeleteButtonVisibility(it) }
 
     }
 }

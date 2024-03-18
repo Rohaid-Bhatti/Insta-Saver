@@ -1,8 +1,9 @@
 package com.hazel.instadownloader.features.download.adapter
 
-import com.hazel.instadownloader.features.download.model.MergeDownloadItem
+import com.hazel.instadownloader.core.database.DownloadedItem
 
 interface DeleteFileCallback {
-    fun onShowingMenu(mergeItem: MergeDownloadItem, position: Int, selectedFiles: HashSet<MergeDownloadItem>)
+    fun onShowingMenu(mergeItem: DownloadedItem, position: Int)
+
     fun onDeleteFileSelected(isFileSelected: Boolean)
 }

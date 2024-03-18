@@ -28,13 +28,6 @@ class PlayerActivity : AppCompatActivity() {
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
-        /*binding?.toolbarVideo?.myToolbar?.title = ""
-        setSupportActionBar(binding?.toolbarVideo?.myToolbar)
-        setSupportActionBar(binding?.toolbarVideo?.root)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-        }*/
-
         binding?.toolbarVideo?.ivMenuBack?.setImageResource(R.drawable.ic_arrow_back)
         binding?.toolbarVideo?.ivMenuBack?.setOnClickListener {
             finish()
@@ -90,40 +83,4 @@ class PlayerActivity : AppCompatActivity() {
             videoPagerAdapter?.notifyDataSetChanged()
         }
     }
-
-    /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.image_activity_menu, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                return true
-            }
-            R.id.whatsAppIcon -> {
-                val currentPosition = binding!!.videoPager.currentItem
-                shareOnWhatsApp(this, File(Uri.parse(videoUris[currentPosition]).path.toString()))
-                return true
-            }
-            R.id.shareIcon -> {
-                val currentPosition = binding!!.videoPager.currentItem
-                shareFile(this, File(Uri.parse(videoUris[currentPosition]).path.toString()))
-                return true
-            }
-            R.id.repostIcon -> {
-                val currentPosition = binding!!.videoPager.currentItem
-                val isVideo = isVideoFile(File(Uri.parse(videoUris[currentPosition]).path.toString()))
-                shareFileToInstagram(this, File(Uri.parse(videoUris[currentPosition]).path.toString()), isVideo)
-                return true
-            }
-            R.id.deleteIcon -> {
-                val currentPosition = binding!!.videoPager.currentItem
-                showDeleteConfirmationDialog(currentPosition)
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }*/
 }
