@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".features.bottomSheets.RateUsBottomSheetFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/crossIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ratingEmoji"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/great_review"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/crossIcons"/>
+
+        <TextView
+            android:id="@+id/tvRateExperience"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rate_this_app"
+            android:textColor="@color/black"
+            android:fontFamily="@font/sf_pro_rounded_bold"
+            android:textSize="20sp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintStart_toStartOf="@id/ratingEmoji"
+            app:layout_constraintEnd_toEndOf="@id/ratingEmoji"
+            app:layout_constraintTop_toBottomOf="@+id/ratingEmoji"/>
+
+        <TextView
+            android:id="@+id/tvRateDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/provide_a_rating"
+            android:textColor="@color/titleColor"
+            android:fontFamily="@font/sf_pro_rounded_medium"
+            android:textSize="18sp"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="@id/ratingEmoji"
+            app:layout_constraintEnd_toEndOf="@id/ratingEmoji"
+            app:layout_constraintTop_toBottomOf="@+id/tvRateExperience"/>
+
+        <com.willy.ratingbar.ScaleRatingBar
+            android:id="@+id/rBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvRateDesc"
+            app:srb_clearRatingEnabled="true"
+            app:srb_clickable="true"
+            app:srb_drawableEmpty="@drawable/unfilled_star"
+            app:srb_drawableFilled="@drawable/filled_star"
+            app:srb_isIndicator="false"
+            app:srb_minimumStars="1"
+            app:srb_numStars="5"
+            app:srb_rating="5"
+            app:srb_scrollable="true"
+            app:srb_starHeight="32dp"
+            app:srb_starPadding="12dp"
+            app:srb_starWidth="32dp"
+            app:srb_stepSize="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRateUs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:paddingVertical="10dp"
+            android:text="@string/rate_us_drawer"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:fontFamily="@font/sf_pro_rounded_bold"
+            android:backgroundTint="@color/adsTextColor"
+            app:iconTintMode="add"
+            app:iconGravity="textStart"
+            app:iconTint="@android:color/transparent"
+            app:iconPadding="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/rBar"
+            app:layout_constraintStart_toStartOf="@id/rBar"
+            app:layout_constraintEnd_toEndOf="@id/rBar"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

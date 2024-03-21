@@ -51,6 +51,7 @@
     <string name="share_txt">Share</string>
     <string name="rename_txt">Rename</string>
     <string name="delete_txt">Delete</string>
+    <string name="_00_00">00:00</string>
 
     <!--Permission custom Dialog box-->
     <string name="permission_denied_title">Permission Request</string>
@@ -90,4 +91,16 @@
     <string name="clear_history">Clear History</string>
     <string name="subtitle_clear_history">Would you like to remove recent search history on Instagram profiles?</string>
     <string name="yes_clear">Yes, Clear</string>
+    <string name="no_search_item_found">No Search Item found</string>
+
+    <!--Rate us bottom sheet-->
+    <string name="rate_this_app">Rate this app</string>
+    <string name="provide_a_rating">Please provide a rating for us on Google Play</string>
+    <string name="very_poor">Very Poor</string>
+    <string name="poor">Poor</string>
+    <string name="normal">Normal</string>
+    <string name="great">Great</string>
+    <string name="love_it">Love It</string>
+    <string name="rate_experience">Please rate your experience with us</string>
+    <string name="rate_us_google_play">Rate us Google Play</string>
 </resources>

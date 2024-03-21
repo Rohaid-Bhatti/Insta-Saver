@@ -97,4 +97,5 @@ dependencies {
 
     //for animation
     implementation("com.airbnb.android:lottie:5.1.1")
+    implementation("com.github.ome450901:SimpleRatingBar:1.5.1")
 }

@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.hazel.instadownloader.app.utils.DataStores
 import com.hazel.instadownloader.app.utils.PermissionManager.checkPermission
@@ -44,6 +43,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, DeleteFileCallback {
+    private var onBackPressedCallback: OnBackPressedCallback? = null
     private val downloadedUrlViewModel: DownloadedUrlViewModel by activityViewModels()
     private var downloadAdapter: DownloadAdapter? = null
     private var _binding: FragmentDownloadBinding? = null
@@ -83,11 +83,6 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
     ): View {
         _binding = FragmentDownloadBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -182,7 +177,11 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
 
         val rowsDeleted = context.contentResolver.delete(contentUri, selection, selectionArgs)
 
-        downloadedUrlViewModel.allDownloadedItems?.value?.firstOrNull { it.fileName == item.fileName.split(".")[0] }?.let { item ->
+        downloadedUrlViewModel.allDownloadedItems?.value?.firstOrNull {
+            it.fileName == item.fileName.split(
+                "."
+            )[0]
+        }?.let { item ->
             downloadedUrlViewModel.deleteDownloadedItem(item.fileName)
         }
 
@@ -273,7 +272,7 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         lifecycleScope.launch(Dispatchers.Main) {
             delay(500)
 
-            downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) {downloadedItems ->
+            downloadedUrlViewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
                 val sortedList = downloadedItems.sortedByDescending { it.id }
                 updateUI(sortedList)
             }
@@ -320,28 +319,6 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         }
     }
 
-    private fun showCustomPermissionDeniedDialog() {
-
-        val dialogFragment = PermissionCheckDialogFragment()
-        activity?.let {
-            dialogFragment.show(
-                it.supportFragmentManager, "PermissionDeniedDialogFragment"
-            )
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (!checkPermission(requireContext())) {
-            binding.progressBar.visibility = View.GONE
-            binding.ivDownloadBox.visibility = View.VISIBLE
-            binding.materialTextView.visibility = View.VISIBLE
-        } else {
-            loadFiles()
-        }
-    }
-
     private fun requestPermission() {
         val permissionRequest: MutableList<String> = ArrayList()
 
@@ -372,23 +349,65 @@ class DownloadFragment : Fragment(), DownloadAdapter.SelectionModeListener, Dele
         }
     }
 
+    private fun showCustomPermissionDeniedDialog() {
+
+        val dialogFragment = PermissionCheckDialogFragment()
+        activity?.let {
+            dialogFragment.show(
+                it.supportFragmentManager, "PermissionDeniedDialogFragment"
+            )
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        downloadedItemsUnSelection()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        downloadedItemsUnSelection()
+        onBackPressedCallback?.isEnabled = true
+        if (!checkPermission(requireContext())) {
+            binding.progressBar.visibility = View.GONE
+            binding.ivDownloadBox.visibility = View.VISIBLE
+            binding.materialTextView.visibility = View.VISIBLE
+        } else {
+            loadFiles()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        onBackPressedCallback?.isEnabled = false
+        onBackPressedCallback?.remove()
+        _binding = null
+    }
+
     private fun initBackPressDispatcher() {
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (downloadAdapter?.isSelectionModeEnabled == true) {
-                        downloadAdapter?.selectAllItems(false)
-                        downloadAdapter?.isSelectionModeEnabled = false
-                        downloadAdapter?.notifyDataSetChanged()
-                        Log.d(
-                            "TESTING_FILES",
-                            "handleOnBackPressed: ${downloadAdapter?.isSelectionModeEnabled}"
-                        )
-                    } else {
-                        findNavController().navigateUp()
-                    }
-                }
-            })
+        onBackPressedCallback = object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                onBackPressedCallback?.isEnabled = false
+                downloadedItemsUnSelection()
+            }
+        }
+        onBackPressedCallback?.let {
+            activity?.onBackPressedDispatcher?.addCallback(
+                viewLifecycleOwner, it
+            )
+        }
+    }
+
+    private fun downloadedItemsUnSelection() {
+        if (downloadAdapter?.isSelectionModeEnabled == true) {
+            downloadAdapter?.selectAllItems(false)
+            downloadAdapter?.isSelectionModeEnabled = false
+            downloadAdapter?.notifyDataSetChanged()
+            Log.d(
+                "TESTING_FILES",
+                "handleOnBackPressed: ${downloadAdapter?.isSelectionModeEnabled}"
+            )
+        }
     }
 
     override fun onShowingMenu(mergeItem: DownloadedItem, position: Int) {

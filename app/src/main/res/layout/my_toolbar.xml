@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/myToolbar"
-    android:elevation="@dimen/language_recycler_bottom"
-    android:paddingEnd="16dp"
-    android:background="@color/white"
-    app:titleTextAppearance="@style/ToolbarTitleText">
-
-</androidx.appcompat.widget.Toolbar>-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/myToolbar"
@@ -18,8 +6,7 @@
     android:padding="16dp"
     android:elevation="1dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:titleTextAppearance="@style/ToolbarTitleText">
+    android:layout_height="wrap_content">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivMenuBack"

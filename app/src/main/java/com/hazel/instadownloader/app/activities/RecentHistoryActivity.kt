@@ -40,13 +40,29 @@ class RecentHistoryActivity : AppCompatActivity() {
                 }
                 binding.rvRecentSearchItemHistory.adapter = adapter
             } else {
-                // do something
+                binding.rvRecentSearchItemHistory.visibility = View.GONE
+                binding.tvNoHistory.visibility = View.VISIBLE
+                binding.btnClear.visibility = View.GONE
             }
         }
         binding.rvRecentSearchItemHistory.layoutManager = GridLayoutManager(this, 4)
 
         val dialogClear = ClearHistoryDialogFragment {
             viewModel.clearRecentSearchHistory()
+
+            viewModel.allSearchedItems?.observe(this) { recentItems ->
+                if (recentItems.isNotEmpty()) {
+                    val sortedList = recentItems.sortedByDescending { it.id }
+                    val adapter = RecentSearchAdapter(sortedList) { item ->
+                        openInstagramProfile(item, this)
+                    }
+                    binding.rvRecentSearchItemHistory.adapter = adapter
+                } else {
+                    binding.rvRecentSearchItemHistory.visibility = View.GONE
+                    binding.tvNoHistory.visibility = View.VISIBLE
+                    binding.btnClear.visibility = View.GONE
+                }
+            }
         }
 
         binding.btnClear.setOnClickListener {

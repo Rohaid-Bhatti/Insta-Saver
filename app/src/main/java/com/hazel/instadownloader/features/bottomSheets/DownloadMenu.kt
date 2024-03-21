@@ -25,7 +25,6 @@ class DownloadMenu : BottomSheetDialogFragment() {
 
         val closeIcon = view.findViewById<ImageView>(R.id.closeIcon)
         val viewOnInsta = view.findViewById<View>(R.id.layoutView)
-//        val postUrl = "https://www.instagram.com/p/C2FSkkYsW7B/?chaining=true"
         val repostButton = view.findViewById<View>(R.id.layoutRepost)
         val shareButton = view.findViewById<View>(R.id.layoutShare)
         val whatsappButton = view.findViewById<View>(R.id.layoutWhatsapp)

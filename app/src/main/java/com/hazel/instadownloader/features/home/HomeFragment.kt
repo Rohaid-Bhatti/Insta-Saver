@@ -34,7 +34,6 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.hazel.instadownloader.R
 import com.hazel.instadownloader.app.activities.RecentHistoryActivity
 import com.hazel.instadownloader.app.adapters.RecentSearchAdapter
-import com.hazel.instadownloader.app.utils.session
 import com.hazel.instadownloader.app.utils.switch
 import com.hazel.instadownloader.core.database.DownloadedItem
 import com.hazel.instadownloader.core.database.DownloadedUrlViewModel
@@ -61,7 +60,14 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-class HomeFragment : Fragment() {
+class HomeFragment() : Fragment() {
+    var postURL: String? = null
+    var navigateFun : (() -> Unit)? = null
+
+    constructor(postURL: String?, navigateFun: () -> Unit) : this() {
+        this.postURL = postURL
+        this.navigateFun = navigateFun
+    }
 
     private var drawableStart: Drawable? = null
     private var linkDownloader: PyObject? = null
@@ -70,7 +76,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var postUrl: String? = null
     private var cleanUsername: String? = null
     private var cleanCaption: String? = null
     private var cleanPostUrl: String? = null
@@ -105,35 +110,23 @@ class HomeFragment : Fragment() {
 
     private fun initialization() {
         activity?.let { viewModel.init(it) }
-
-        arguments?.let {
-            postUrl = it.getString("POST_URL")
-        }
     }
 
     private fun setValues(view: View) = binding.apply {
-        Log.d("TESTING_AUTO", "setValues postUrl value: $postUrl")
-        if (postUrl == null) {
-            Log.d("TESTING_AUTO", "setValues: SetValues function in if part")
-
+        if (postURL == null) {
             view.viewTreeObserver.addOnGlobalLayoutListener(object :
                 ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    if (session) {
-                        Log.d("TESTING_AUTO", "onGlobalLayout: running the copy function")
-                        copyUrl()
-                        session = false
-                    }
+                    copyUrl()
+
                     if (etUrl.text?.isEmpty() == false && switch) {
                         downloadFun(linkDownloader, posts, downloader)
                     }
-//                    copyUrl()
                 }
             })
         } else {
-            Log.d("TESTING_AUTO", "setValues: SetValues function in else part")
-            etUrl.setText(postUrl)
+            etUrl.setText(postURL)
             if (etUrl.text?.isEmpty() == false && switch) {
                 downloadFun(linkDownloader, posts, downloader)
             }
@@ -192,7 +185,7 @@ class HomeFragment : Fragment() {
         })
 
         // Adding click listener to the close icon drawable
-        binding.etUrl.setOnTouchListener { v, event ->
+        binding.etUrl.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 val drawableEnd = binding.etUrl.compoundDrawablesRelative[2]
                 if (drawableEnd != null && event.rawX >= (binding.etUrl.right - drawableEnd.bounds.width())) {
@@ -235,12 +228,12 @@ class HomeFragment : Fragment() {
                         downloadFun(linkDownloader, posts, downloader)
                     }
                 }
-//            downloadFun(linkDownloader, posts, downloader)
             }
         }
 
         binding.tvViewDownloads.setOnClickListener {
-            findNavController().navigate(R.id.downloadFragment)
+//            findNavController().navigate(R.id.downloadFragment)
+            navigateFun?.invoke()
         }
     }
 
@@ -270,7 +263,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateLatestDownloadedMediaFile() {
-
         viewModel.allDownloadedItems?.observe(viewLifecycleOwner) { downloadedItems ->
             if (downloadedItems.isNotEmpty()) {
                 displayDownloadedMedia(downloadedItems)
@@ -392,7 +384,9 @@ class HomeFragment : Fragment() {
                             "Found ${posts?.call(binding.etUrl.text.toString())} posts, Downloading..."
                     } catch (error: Throwable) {
                         Toast.makeText(
-                            requireContext(), getString(R.string.something_went_wrong), Toast.LENGTH_LONG
+                            requireContext(),
+                            getString(R.string.something_went_wrong),
+                            Toast.LENGTH_LONG
                         ).show()
                         val errorName = error.toString().split(":")
                         binding.StatusText.text = errorName[errorName.size - 1]
@@ -403,9 +397,12 @@ class HomeFragment : Fragment() {
                             downloader?.call(binding.etUrl.text.toString())
                             activity?.runOnUiThread {
                                 Toast.makeText(
-                                    requireContext(), getString(R.string.download_finished), Toast.LENGTH_LONG
+                                    requireContext(),
+                                    getString(R.string.download_finished),
+                                    Toast.LENGTH_LONG
                                 ).show()
-                                binding.StatusText.text = getString(R.string.download_status_finished)
+                                binding.StatusText.text =
+                                    getString(R.string.download_status_finished)
                             }
                         } catch (error: Throwable) {
                             requireActivity().runOnUiThread {
@@ -420,7 +417,8 @@ class HomeFragment : Fragment() {
                     }
                 }
             } else {
-                Toast.makeText(requireContext(), getString(R.string.empty_field), Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.empty_field), Toast.LENGTH_LONG)
+                    .show()
             }
         } catch (error: Throwable) {
             Log.e("DOWNLOAD_FUNCTION", "downloadFun: ", error)
@@ -467,9 +465,21 @@ class HomeFragment : Fragment() {
 
             ivThumbnail.setOnClickListener {
                 if (isVideo) {
-                    activity?.let { it1 -> playVideo(it1, 0, listOf(File(downloadedItem.filePath))) }
+                    activity?.let { it1 ->
+                        playVideo(
+                            it1,
+                            0,
+                            listOf(File(downloadedItem.filePath))
+                        )
+                    }
                 } else {
-                    activity?.let { it1 -> showImage(it1, 0, listOf(File(downloadedItem.filePath))) }
+                    activity?.let { it1 ->
+                        showImage(
+                            it1,
+                            0,
+                            listOf(File(downloadedItem.filePath))
+                        )
+                    }
                 }
             }
 
@@ -479,7 +489,13 @@ class HomeFragment : Fragment() {
 
                 dialog.setOnOptionClickListener(object : DownloadMenu.OnOptionClickListener {
                     override fun onRepostInstagramClicked() {
-                        activity?.let { it1 -> shareFileToInstagram(it1, File(downloadedItem.filePath), isVideo) }
+                        activity?.let { it1 ->
+                            shareFileToInstagram(
+                                it1,
+                                File(downloadedItem.filePath),
+                                isVideo
+                            )
+                        }
                     }
 
                     override fun onShareClicked() {
@@ -498,7 +514,7 @@ class HomeFragment : Fragment() {
 
                             setRenameListener(object : RenameDialogFragment.RenameListener {
                                 override fun onRenameConfirmed(newName: String) {
-    //                                renameFile(context, item, newName, position)
+                                    //                                renameFile(context, item, newName, position)
                                     renameFile(File(downloadedItem.filePath), newName)
                                 }
                             })
@@ -568,7 +584,6 @@ class HomeFragment : Fragment() {
 
     private fun deleteFile(file: File) {
         if (file.exists()) {
-//            viewModel.deleteDownloadedItem()
             val nameWithoutExt = file.name.split(".")[0]
             viewModel.allDownloadedItems?.value?.firstOrNull { it.fileName == nameWithoutExt }
                 ?.let { item ->

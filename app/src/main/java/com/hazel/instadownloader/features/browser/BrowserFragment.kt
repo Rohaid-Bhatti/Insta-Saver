@@ -14,12 +14,14 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import com.hazel.instadownloader.databinding.FragmentBrowserBinding
 import com.hazel.instadownloader.features.browser.downloadManager.DownloadManager
 import java.io.BufferedReader
 import java.io.IOException
 
 class BrowserFragment : Fragment() {
+    private var onBackPressedCallback: OnBackPressedCallback? = null
     private var _binding: FragmentBrowserBinding? = null
     private val binding get() = _binding!!
 
@@ -95,4 +97,5 @@ class BrowserFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
 }

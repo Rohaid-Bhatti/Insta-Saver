@@ -23,4 +23,5 @@
     <color name="SettingButtonBgColor">#40FFFFFF</color>
 
     <color name="RenameDialogButtonBgColor">#EAEAEA</color>
+    <color name="RatingStarColor">#FFB42D</color>
 </resources>

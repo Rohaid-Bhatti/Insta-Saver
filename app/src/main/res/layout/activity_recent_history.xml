@@ -25,6 +25,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/btnClear"/>
 
+    <TextView
+        android:id="@+id/tvNoHistory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_search_item_found"
+        android:fontFamily="@font/sf_pro_rounded_medium"
+        android:textColor="@color/subtitleColor"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnClear"
         android:layout_width="match_parent"
